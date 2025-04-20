@@ -95,12 +95,10 @@ class BondAnalysis:
         oAmort = self.check_is_in_db(sSECID, 'amort')
 
         if bExcludeAmor:
-            print(len(oAmort.index))
             if len(oAmort.index) > 1:
                 return True
 
         return False
-
 
     def get_future_coupons(self, sSECID):
         """

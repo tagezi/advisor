@@ -19,6 +19,7 @@
 DATETIME_FORMAT = "%d.%m.%Y %H:%M:%S"
 DATE_FORMAT = "%Y-%m-%d"
 
+# цвета для раскраски значений столбца
 COLOR = ['#ff0d05', '#ff0000', '#ff190a', '#ff260f', '#ff3314', '#ff401a',
          '#ff4d1f', '#ff5924', '#ff6629', '#ff732e', '#ff8033', '#ff8c38',
          '#ff993d', '#ffa642', '#ffb247', '#ffbf4c', '#ffcc52', '#ffd957',
@@ -31,6 +32,7 @@ DAYS = 364
 BIRGAFEE = 0.00003
 BROKERFEE = 0.0003
 TAX = 0.13
+# значение свободных средств для расчета эффективной доходности
 TEMPPORTFILIO = 12000000
 
 MONTH_NAMES_RU_FULL = [
@@ -62,7 +64,7 @@ MONTH_NAMES_RU_SHORT = [
     "дек",
 ]
 
-FILE_DB = '/home/lera/project/backtesting/db/advisor.db'
+FILE_DB = ''
 # Переменная для задержки API запросов, лимит в 50 запросов в минуту
 API_DELAY = 1.2
 

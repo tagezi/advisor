@@ -225,7 +225,6 @@ class MOEXUpdate:
                                                    'SECID',
                                                    sSECID[0])
                 if not bSECID:
-                    print(sSECID)
                     sURL = f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
                     jJSON = connect(sURL,
                                     only='description',
@@ -241,7 +240,6 @@ class MOEXUpdate:
                                   'ISQUALIFIEDINVESTORS', 'EMITTER_ID']
                     oJSON = oJSON[oJSON['name'].isin(lCondition)]
 
-                    print(oJSON)
                     sColumns = ', '.join(oJSON['name'])
                     lValues = oJSON['value'].tolist()
                     self.oConnect.insert_row('BondDescription',
@@ -251,7 +249,6 @@ class MOEXUpdate:
         else:
             sURL = f'https://iss.moex.com/iss/securities/{sSECID}.json'
             jJSON = connect(sURL)
-            print(jJSON)
 
     def get_collection(self, sType='', iLevel=0, sGroup='stock_bonds',
                        sCollectionName=''):
@@ -361,9 +358,6 @@ class MOEXUpdate:
         else:
             sString = "%s%s" % (sType[0].upper(), sType[1:])
             sValue = f'{sString} уровень {iLevel}'
-
-        print(sString)
-        print(sValue)
 
         sQuery = self.oConnect.select(sTable='SecurityCollections',
                                       sGet='name',

@@ -165,10 +165,25 @@ class MainWindow(QMainWindow):
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
 
-        # Открываем ссылки из ячеек
-
     @staticmethod
-    def bond_analysis(dTableData, oTableData,
+    def get_data(oTableData, sSECID):
+        # Выбираем строку и подготавливаем её
+        oRowData = oTableData.loc[oTableData['SECID'] == sSECID]
+        oRowData = oRowData.set_index('SECID')
+        # Текущий номинал
+        iFaceValue = oRowData.loc[sSECID, 'FACEVALUE']
+        # Цена предыдущего дня
+        fPrice = oRowData.loc[sSECID, 'PREVPRICE']
+        # НКД
+        fACC = oRowData.loc[sSECID, 'ACCRUEDINT']
+        # Дата погашения
+        sMatDate = oRowData.loc[sSECID, 'MATDATE']
+        # переводим цену из процентов в валюту номинала
+        fPrice = price_normalization(fPrice, iFaceValue)
+
+        return fPrice, fACC, sMatDate
+
+    def bond_analysis(self, dTableData, oTableData,
                       fInflMedian5, fInflMedian10):
         """
 
@@ -182,10 +197,8 @@ class MainWindow(QMainWindow):
         :return:
         :rtype: pd.DataFrame
         """
-        # IAPP - Inflation-adjusted profit as a percentage
         # IAPPY - Inflation-adjusted profit as a percentage in year
-        lProfitPercent, lProfitInYear = [], []
-        lIAPP5Tax, lIAPPY5Tax, lIAPP10Tax, lIAPPY10Tax = [], [], [], []
+        lIAPPY5Tax, lIAPPY10Tax = [], []
         for sSECID in oTableData['SECID']:
             bAmort = dTableData.get_check_amort(sSECID=sSECID)
             if bAmort:
@@ -195,28 +208,17 @@ class MainWindow(QMainWindow):
                 )
                 continue
 
-            # Выбираем строку и подготавливаем её
-            oRowData = oTableData.loc[oTableData['SECID'] == sSECID]
-            oRowData = oRowData.set_index('SECID')
-            # Собираем данные об облигации
-            iFaceValue = oRowData.loc[sSECID, 'FACEVALUE']
-            # Цена предыдущего дня
-            fPrice = oRowData.loc[sSECID, 'PREVPRICE']
-            fPrice = price_normalization(fPrice, iFaceValue)
-
+            fPrice, fACC, sMatDate = self.get_data(oTableData, sSECID)
             oUpCoupons = dTableData.get_future_coupons(sSECID=sSECID)
+            # высчитываем значения и купоны с учетом инфляции
             fFaceValue5 = face_value_inflation(fInflMedian5, oUpCoupons)
             lInflUpCoupons5 = by_inflation(fInflMedian5, oUpCoupons)
             fFaceValue10 = face_value_inflation(fInflMedian10, oUpCoupons)
             lInflUpCoupons10 = by_inflation(fInflMedian10, oUpCoupons)
-            # Находим сумму купонов
-            fSumValue = oUpCoupons.sum()['coupon_value']
+            # находим сумму купонов
             fInfSumValue5 = sum(lInflUpCoupons5)
             fInfSumValue10 = sum(lInflUpCoupons10)
-            fACC = oRowData.loc[sSECID, 'ACCRUEDINT']
-            sMatDate = oRowData.loc[sSECID, 'MATDATE']
-            fProfit = ofz_bond_profit(fSumValue, fACC, iFaceValue, fPrice,
-                                      sDate=sMatDate)
+            # высчитываем прибыль с учетом комиссий и налога
             fProfitInfl5Tax = ofz_bond_profit(fInfSumValue5, fACC, fFaceValue5,
                                               fPrice, sDate=sMatDate,
                                               bTax=True)
@@ -224,15 +226,9 @@ class MainWindow(QMainWindow):
                                                fFaceValue10, fPrice,
                                                sDate=sMatDate, bTax=True)
             # Считаем доход в процентах
-            fProfitPercent = ofz_bond_profit_percent(fProfit, fPrice)
             fIAPP5Tax = ofz_bond_profit_percent(fProfitInfl5Tax, fPrice)
             fIAPP10Tax = ofz_bond_profit_percent(fProfitInfl10Tax, fPrice)
-            # добавляем доход в процентах в списки
-            lProfitPercent.append(fProfitPercent)
-            lIAPP5Tax.append(fIAPP5Tax)
-            lIAPP10Tax.append(fIAPP10Tax)
             # считаем доход в процентах в год
-            lProfitInYear.append(percent_year(fProfitPercent, sMatDate))
             lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
             lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
         # формируем новую таблицу
@@ -242,9 +238,7 @@ class MainWindow(QMainWindow):
 
         oTableData.columns = ['ID', 'Имя', 'Цена, %', 'Доходность, %',
                               'Процент (инфл 5) в год, %',
-                              # 'Эф. процент (инфл 5) в год, %',
                               'Процент (инфл 10) в год, %',
-                              # 'Эф. процент (инфл 5) в год, %',
                               'Процент купона', 'Значение купона, руб', 'НКД',
                               'Следующий купон', 'Период купона',
                               'Начальный номинал', 'Текущий номинал',
@@ -261,8 +255,6 @@ class MainWindow(QMainWindow):
         # Отбираем список облигаций
         dTableData = BondAnalysis(self.oConnector)
         oTableData = dTableData.get_bond_by_values()
-        # oTableData = oTableData.drop(columns=['LISTLEVEL', 'TYPENAME'])
-
         oTableData = self.bond_analysis(dTableData,
                                         oTableData,
                                         fInflMedian5,

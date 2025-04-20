@@ -95,7 +95,7 @@ def face_value_inflation(fInfl, oUpCoupon):
     :param oUpCoupon: DataFrame с пересчитываемыми значениями
     :type oUpCoupon: pd.DataFrame
     :return: список пересчитанных значений
-    :rtype: list
+    :rtype: int
     """
     sDate = oUpCoupon['coupon_date'].iloc[-1]
     oDate = datetime.strptime(sDate, '%Y-%m-%d')
@@ -163,7 +163,7 @@ def ofz_bond_profit(fSumCoupon, dACC, iFaceValue, fPrice, sDate,
     :type fSumCoupon: float
     :param dACC: скопленный купон
     :type dACC: float
-    :param iFaceValue: цена погашения
+    :param iFaceValue: тукущая цена погашения
     :type iFaceValue: int
     :param fPrice: цена покупки облигации
     :type fPrice: float
