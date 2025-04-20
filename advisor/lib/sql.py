@@ -488,31 +488,38 @@ class SQL:
                            fMinYield=10,
                            fMaxYield=30,
                            bOFZ=False,
-                           bIN=False):
-        sQuery = ("SELECT BordSecurities.SECID, BordSecurities.ISIN, "
-                  "BordSecurities.SHORTNAME, BordSecurities.PREVPRICE, "
-                  "BordSecurities.YIELDATPREVWAPRICE, "
-                  "BordSecurities.COUPONPERCENT, BordSecurities.COUPONVALUE, "
-                  "BordSecurities.ACCRUEDINT, "
-                  "BordSecurities.NEXTCOUPON, "
-                  "BordSecurities.COUPONPERIOD, "
-                  "BondDescription.INITIALFACEVALUE, "
-                  "BondDescription.FACEVALUE, "
-                  "BondDescription.FACEUNIT, "
-                  "BordSecurities.MATDATE, "
-                  "BordSecurities.LISTLEVEL, "
-                  "BondDescription.EMITTER "
-                  "FROM BordSecurities "
-                  "JOIN BondDescription "
-                  "ON BondDescription.SECID=BordSecurities.SECID "
-                  f"WHERE BondDescription.INITIALFACEVALUE <= {iInitialFaceValue} "
-                  f"AND BondDescription.FACEUNIT = \"{sFaceUnit}\" "
-                  "AND BondDescription.ISQUALIFIEDINVESTORS=0 "
-                  "AND BordSecurities.PREVPRICE is not NULL "
-                  "AND BordSecurities.OFFERDATE is NULL "
-                  "AND BordSecurities.COUPONPERCENT>1 "
-                  "AND BordSecurities.MATDATE>\"2025-09-01\" "
-                  "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE ")
+                           bIN=False,
+                           iMinPeriod=30,
+                           iMaxPeriod=182
+                           ):
+        sQuery = (
+            "SELECT BordSecurities.SECID, BordSecurities.ISIN, "
+            "BordSecurities.SHORTNAME, BordSecurities.PREVPRICE, "
+            "BordSecurities.YIELDATPREVWAPRICE, "
+            "BordSecurities.COUPONPERCENT, BordSecurities.COUPONVALUE, "
+            "BordSecurities.ACCRUEDINT, "
+            "BordSecurities.NEXTCOUPON, "
+            "BordSecurities.COUPONPERIOD, "
+            "BondDescription.INITIALFACEVALUE, "
+            "BondDescription.FACEVALUE, "
+            "BondDescription.FACEUNIT, "
+            "BordSecurities.MATDATE, "
+            "BordSecurities.LISTLEVEL, "
+            "BondDescription.EMITTER "
+            "FROM BordSecurities "
+            "JOIN BondDescription "
+            "ON BondDescription.SECID=BordSecurities.SECID "
+            f"WHERE BondDescription.INITIALFACEVALUE <= {iInitialFaceValue} "
+            f"AND BondDescription.FACEUNIT = \"{sFaceUnit}\" "
+            "AND BondDescription.ISQUALIFIEDINVESTORS=0 "
+            "AND BordSecurities.PREVPRICE is not NULL "
+            "AND BordSecurities.OFFERDATE is NULL "
+            "AND BordSecurities.COUPONPERCENT>1 "
+            "AND BordSecurities.MATDATE>\"2025-09-01\" "
+            "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
+            f"AND BordSecurities.COUPONPERIOD>={int(iMinPeriod)} "
+            f"AND BordSecurities.COUPONPERIOD<={int(iMaxPeriod)} "
+            )
 
         if bOFZ:
             sQuery = f" {sQuery} AND BordSecurities.SECNAME like \"%ОФЗ%\" "
@@ -536,6 +543,22 @@ class SQL:
         sQuery = f" {sQuery} GROUP BY BordSecurities.MATDATE;"
 
         return pd.read_sql_query(sQuery, self.oConnector)
+
+    def get_period_list(self):
+        lAnswer = self.execute_query(
+            "select distinct BordSecurities.COUPONPERIOD "
+            "FROM BordSecurities "
+            "JOIN BondDescription "
+            "ON BondDescription.SECID=BordSecurities.SECID "
+            "WHERE BondDescription.ISQUALIFIEDINVESTORS=0 "
+            "AND BordSecurities.PREVPRICE is not NULL "
+            "AND BordSecurities.OFFERDATE is NULL "
+            "AND BordSecurities.COUPONPERCENT>1 "
+            "AND BordSecurities.MATDATE>\"2025-09-01\" "
+            "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
+            "order by COUPONPERIOD;")
+
+        return lAnswer
 
 
 if __name__ == '__main__':

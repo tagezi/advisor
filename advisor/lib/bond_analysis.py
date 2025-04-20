@@ -74,11 +74,16 @@ class BondAnalysis:
     def get_bond_by_values(self,
                            iInitialFaceValue=1000,
                            sFaceUnit='SUR',
-                           bOFZ=False):
+                           bOFZ=False,
+                           iMinPeriod=30,
+                           iMaxPeriod=182):
         oQuery = self.oConnector.get_bonds_by_value(self.oPD,
                                                     iInitialFaceValue,
                                                     sFaceUnit,
-                                                    bOFZ=bOFZ)
+                                                    bOFZ=bOFZ,
+                                                    iMinPeriod=iMinPeriod,
+                                                    iMaxPeriod=iMaxPeriod
+                                                    )
         return oQuery
 
     def get_bond_info(self, sSECID):
