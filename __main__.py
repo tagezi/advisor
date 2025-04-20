@@ -22,8 +22,9 @@ from PyQt6.QtWidgets import QApplication
 
 from advisor.ui.main_window import MainWindow
 
-if __name__ == "__main__":
-    path = path.dirname(path.realpath(__file__))
-    app = QApplication(sys.argv)
-    sheet = MainWindow(path)
-    sys.exit(app.exec())
+
+path = path.dirname(path.realpath(__file__))
+print(path)
+app = QApplication(sys.argv)
+sheet = MainWindow(path)
+sys.exit(app.exec())

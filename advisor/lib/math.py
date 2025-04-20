@@ -225,11 +225,21 @@ def sum_pandas(dataframe):
         'tool_code', as_index=False).agg({'buying_count': 'sum'})
 
 
-def weighted_average_pandas(dataframe, value, weight):
-    val = dataframe[value]
-    wt = dataframe[weight]
+def weighted_average_pandas(dataframe):
+    k = ''
+    oSeries = pd.Series()
+    for x in dataframe['tool_code']:
+        if x == k:
+            continue
+        k = x
+        df = dataframe.loc[dataframe['tool_code'] == x]
+        val = df['buying_price']
+        wt = df['buying_count']
+        oSeries = pd.concat([oSeries, pd.Series(
+            ((val * wt).sum() / wt.sum())
+        )])
 
-    return (val * wt).sum() / wt.sum()
+    return oSeries
 
 
 if __name__ == '__main__':

@@ -77,10 +77,7 @@ class ConfigProgram(ConfigParser):
         """
         super().__init__()
 
-        if sys.path[0] == sPathApp:
-            self.sDir = str_get_path(sys.path[0])
-        else:
-            self.sDir = sys.path[0]
+        self.sDir = sys.path[0]
 
         self.sFilePath = str_get_file_patch(self.sDir, sFilePath)
         self.read(self.sFilePath)

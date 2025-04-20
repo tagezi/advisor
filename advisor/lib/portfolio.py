@@ -28,34 +28,26 @@ class Portfolio:
     def portfolio_data(self):
         # все преобразования проходят в DataFrame Pandas, если не указано иное
         oPortfolio = self.oConnector.portfolio(pd)
-
+        oPortfolio = oPortfolio.sort_values(['title', 'tool_code'])
         # суммируем количество по коду инструмента
         oSumByTool = oPortfolio.groupby('tool_code', as_index=False).agg(
             {'buying_count': 'sum'})
 
-        # находим средневзвешенную цену (PWA - Price Weighted Average
-        oSeriesPWA = oPortfolio.groupby('tool_code').apply(
-            weighted_average_pandas,
-            'buying_price',
-            'buying_count',
-            include_groups=False)
+        # находим средневзвешенную цену (PWA - Price Weighted Average)
+        oSeriesPWA = weighted_average_pandas(oPortfolio)
+
         oPortfolio = oPortfolio.groupby('tool_code', as_index=False).agg(
             {'title': 'min', 'SHORTNAME': 'min'})
-
+        oPortfolio = oPortfolio.sort_values(by=['title', 'tool_code'])
         # перемещаем столбец в начало
         type_tool = oPortfolio['title']
         oPortfolio.drop(labels=['title'], axis=1, inplace=True)
         oPortfolio.insert(0, 'title', type_tool)
 
         # объединяем таблицы
-        oPWA = oSeriesPWA.to_frame().reset_index()
-        oPWA.columns = ['tool_code', 'buying_price']
-        oPWA.drop(labels=['tool_code'], axis=1, inplace=True)
-        oPortfolio = pd.concat([oPortfolio,
-                                oPWA.round(2)],
-                               axis=1)
+        oPortfolio['buying_price'] = oSeriesPWA.values.round(2)
         oPortfolio.insert(4, 'buying_count', oSumByTool['buying_count'])
-        oPortfolio = oPortfolio.sort_values(by=['title', 'tool_code'])
+
         oPortfolio.insert(5, 'sum',
                           (oPortfolio['buying_price'] *
                            oPortfolio['buying_count']).round(2))

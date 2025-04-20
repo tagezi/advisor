@@ -44,6 +44,7 @@ def str_get_path(sFullFile):
     :return: The path to file.
     :rtype: str
     """
+    i = split(sFullFile)[1]
     return split(sFullFile)[0]
 
 

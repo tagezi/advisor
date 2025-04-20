@@ -42,6 +42,10 @@ from advisor.lib.str import str_get_file_patch
 
 class MainWindow(QMainWindow):
     def __init__(self, sPath):
+        """
+
+        :type sPath: str
+        """
         super().__init__()
 
         self.oExportToCSV = None
