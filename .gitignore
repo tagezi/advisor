@@ -153,8 +153,8 @@ cython_debug/
 # my work folders and files
 temp/
 db/
-files/
 python.log
 *.db
 *.log
 *.csv
+/files/
