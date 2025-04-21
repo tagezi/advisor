@@ -16,13 +16,11 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from gettext import gettext as _
 from pathlib import Path
 
 import pandas as pd
 from PyQt6.QtGui import QIcon, QAction
-from PyQt6.QtWidgets import QApplication, QMainWindow, QInputDialog, QComboBox, \
-    QCompleter
+from PyQt6.QtWidgets import QApplication, QMainWindow
 from dateutil.utils import today
 
 from advisor.lib.bond_analysis import BondAnalysis
@@ -80,7 +78,7 @@ class MainWindow(QMainWindow):
 
         self.oConnector = SQL(sDBPath)
         check_connect_db(self.oConnector, sBasePath, sDBDir)
-        self.setWindowTitle(_('Advisor'))
+        self.setWindowTitle('Advisor')
         self.oCentralWidget = TabWidget(self)
         self.onPortfolio()
         self.create_actions()
@@ -93,26 +91,26 @@ class MainWindow(QMainWindow):
     def create_actions(self):
         """ Method collect all actions which can do from GUI of program. """
         # File menu
-        self.oOpenDB = QAction(_('Открыть базу данных...'), self)
-        self.oImportStock = QAction(_('Обновить базу данных онлайн'), self)
-        self.oExportToCSV = QAction(_('Экспортировать в CSV'), self)
-        self.oSetting = QAction(_('Настройка...'))
-        self.oExitAct = QAction(QIcon.fromTheme('SP_exit'), _('Выход'), self)
+        self.oOpenDB = QAction('Открыть базу данных...', self)
+        self.oImportStock = QAction('Обновить базу данных онлайн', self)
+        self.oExportToCSV = QAction('Экспортировать в CSV', self)
+        self.oSetting = QAction('Настройка...')
+        self.oExitAct = QAction(QIcon.fromTheme('SP_exit'), 'Выход', self)
         self.oExitAct.setShortcut('Ctrl+Q')
-        self.oExitAct.setStatusTip(_('Закрыть приложение'))
+        self.oExitAct.setStatusTip('Закрыть приложение')
 
         # Edit
-        self.oFind = QAction(_('Искать...'), self)
+        self.oFind = QAction('Искать...', self)
         self.oFind.setShortcut('Ctrl+F')
 
         # Tools
-        self.oStockAnalysis = QAction(_('Таблица акций'))
-        self.oBondAnalysis = QAction(_('Таблица облигаций'))
-        self.oOFZBondAnalysis = QAction(_('Таблица ОФЗ'))
+        self.oStockAnalysis = QAction('Таблица акций')
+        self.oBondAnalysis = QAction('Таблица облигаций')
+        self.oOFZBondAnalysis = QAction('Таблица ОФЗ')
 
         # Help
-        self.oOpenHelp = QAction(_('Справка....'), self)
-        self.oAbout = QAction(_('О программе...'), self)
+        self.oOpenHelp = QAction('Справка....', self)
+        self.oAbout = QAction('О программе...', self)
 
     # Setters
     def set_menu_bar(self):
@@ -120,7 +118,7 @@ class MainWindow(QMainWindow):
         oMenuBar = self.menuBar()
 
         # Create file menu
-        oFileMenu = oMenuBar.addMenu(_('&Файл'))
+        oFileMenu = oMenuBar.addMenu('&Файл')
         oFileMenu.addAction(self.oOpenDB)
         oFileMenu.addAction(self.oImportStock)
         oFileMenu.addAction(self.oExportToCSV)
@@ -129,18 +127,18 @@ class MainWindow(QMainWindow):
         oFileMenu.addAction(self.oExitAct)
 
         # Create Edit menu
-        oEdit = oMenuBar.addMenu(_('&Правка'))
+        oEdit = oMenuBar.addMenu('&Правка')
         oEdit.addAction(self.oFind)
 
         # Create Tool menu
-        oTools = oMenuBar.addMenu(_('&Инструменты'))
+        oTools = oMenuBar.addMenu('&Инструменты')
         oTools.addAction(self.oStockAnalysis)
         oFileMenu.addSeparator()
         oTools.addAction(self.oBondAnalysis)
         oTools.addAction(self.oOFZBondAnalysis)
 
         # Create Help menu
-        oHelpMenu = oMenuBar.addMenu(_('&Справка'))
+        oHelpMenu = oMenuBar.addMenu('&Справка')
         oHelpMenu.addAction(self.oOpenHelp)
         oHelpMenu.addAction(self.oAbout)
 
@@ -150,7 +148,7 @@ class MainWindow(QMainWindow):
         dTableData = oPortfolio.portfolio_data()
         oTableWidget = TableWidget(dTableData)
 
-        self.oCentralWidget.add_tab(oTableWidget, _('Портфель'))
+        self.oCentralWidget.add_tab(oTableWidget, 'Портфель')
 
     def connect_actions(self):
         """ It is PyQt6 slots or other words is connecting from GUI element to
