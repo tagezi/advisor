@@ -237,18 +237,20 @@ class MainWindow(QMainWindow):
             lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
             lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
         # формируем новую таблицу
-        oTableData.insert(5, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
-        oTableData.insert(6, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
+        oTableData.insert(6, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
+        oTableData.insert(7, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
         oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
 
-        oTableData.columns = ['ID', 'Имя', 'Цена, %', 'Доходность, %',
-                              'Процент (инфл 5) в год, %',
-                              'Процент (инфл 10) в год, %',
+        oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
+                              'Доходность, %',
+                              '% в год при сред. инфл. за 5л)',
+                              '% в год при сред. инфл за 10л)',
                               'Процент купона', 'Значение купона, руб', 'НКД',
                               'Следующий купон', 'Период купона',
                               'Начальный номинал', 'Текущий номинал',
-                              'Дата погашения', 'Уровень листинга', 'Эмитент']
-        oTableData = oTableData[oTableData['Процент (инфл 5) в год, %'] > 0]
+                              'Уровень листинга', 'Эмитент']
+        oTableData = oTableData[
+            oTableData['% в год при сред. инфл. за 5л)'] > 0]
 
         return oTableData
 
@@ -269,8 +271,7 @@ class MainWindow(QMainWindow):
 
         # запускаем всю эту херь
         oTableWidget = TableWidget(oTableData, True)
-
-        self.oCentralWidget.add_tab(oTableWidget, _('Список облигаций'))
+        self.oCentralWidget.add_tab(oTableWidget, 'Список облигаций')
 
     def get_period_list(self):
         tList = self.oConnector.get_period_list()
@@ -301,7 +302,7 @@ class MainWindow(QMainWindow):
         # запускаем всю эту херь
         oTableWidget = TableWidget(oTableData, True)
 
-        self.oCentralWidget.add_tab(oTableWidget, _('Список ОФЗ'))
+        self.oCentralWidget.add_tab(oTableWidget, 'Список ОФЗ')
 
     def onDisplayAbout(self):
         """ Method open dialog window with information about the program. """

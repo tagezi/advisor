@@ -494,18 +494,13 @@ class SQL:
                            ):
         sQuery = (
             "SELECT BordSecurities.SECID, BordSecurities.ISIN, "
-            "BordSecurities.SHORTNAME, BordSecurities.PREVPRICE, "
-            "BordSecurities.YIELDATPREVWAPRICE, "
+            "BordSecurities.SHORTNAME, BordSecurities.MATDATE, "
+            "BordSecurities.PREVPRICE, BordSecurities.YIELDATPREVWAPRICE, "
             "BordSecurities.COUPONPERCENT, BordSecurities.COUPONVALUE, "
-            "BordSecurities.ACCRUEDINT, "
-            "BordSecurities.NEXTCOUPON, "
-            "BordSecurities.COUPONPERIOD, "
-            "BondDescription.INITIALFACEVALUE, "
-            "BondDescription.FACEVALUE, "
-            "BondDescription.FACEUNIT, "
-            "BordSecurities.MATDATE, "
-            "BordSecurities.LISTLEVEL, "
-            "BondDescription.EMITTER "
+            "BordSecurities.ACCRUEDINT, BordSecurities.NEXTCOUPON, "
+            "BordSecurities.COUPONPERIOD, BondDescription.INITIALFACEVALUE, "
+            "BondDescription.FACEVALUE, BondDescription.FACEUNIT, "
+            "BordSecurities.LISTLEVEL, BondDescription.EMITTER "
             "FROM BordSecurities "
             "JOIN BondDescription "
             "ON BondDescription.SECID=BordSecurities.SECID "
@@ -544,18 +539,28 @@ class SQL:
 
         return pd.read_sql_query(sQuery, self.oConnector)
 
-    def get_period_list(self):
+    def get_period_list(self,
+                        iInitialFaceValue=1000,
+                        sFaceUnit='SUR',
+                        sMatDateStart='2025-09-01',
+                        iMaxPeriod=182
+                        ):
         lAnswer = self.execute_query(
             "select distinct BordSecurities.COUPONPERIOD "
             "FROM BordSecurities "
             "JOIN BondDescription "
             "ON BondDescription.SECID=BordSecurities.SECID "
             "WHERE BondDescription.ISQUALIFIEDINVESTORS=0 "
+            f"AND BondDescription.INITIALFACEVALUE <= {iInitialFaceValue} "
+            f"AND BondDescription.FACEUNIT = \"{sFaceUnit}\" "
             "AND BordSecurities.PREVPRICE is not NULL "
             "AND BordSecurities.OFFERDATE is NULL "
-            "AND BordSecurities.COUPONPERCENT>1 "
-            "AND BordSecurities.MATDATE>\"2025-09-01\" "
+            "AND BordSecurities.COUPONPERCENT > 1 "
+            f"AND BordSecurities.MATDATE > \"{sMatDateStart}\" "
+            f"AND BordSecurities.COUPONPERIOD<={int(iMaxPeriod)} "
             "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
+            "AND BondDescription.EMITTER not like \"%икрофинансовая%\" "
+            "AND BondDescription.EMITTER not like \"%коллектор%\" "
             "order by COUPONPERIOD;")
 
         return lAnswer
