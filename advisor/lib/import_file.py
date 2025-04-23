@@ -54,7 +54,7 @@ def import_csv_reports(sFile=fFile, sCompanyName=sName, oConnector=oConn):
 
 
 def update_emitter():
-    fFile = "/home/lera/Документы/Финансы/Privilege_17.04.2025.csv"
+    fFile = ""
     with open(fFile, newline='') as csvfile:
         CSV = csv.reader(csvfile, delimiter=';')
         for row in CSV:

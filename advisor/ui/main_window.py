@@ -328,7 +328,7 @@ class MainWindow(QMainWindow):
         iIndex = self.oCentralWidget.currentIndex()
         oTable = self.oCentralWidget.findChildren(TableWidget)
         oData = today().strftime('%Y%m%d')
-        filepath = Path(f'/home/lera/Документы/Финансы/{oData}.csv')
+        filepath = Path(f'')
         filepath.parent.mkdir(parents=True, exist_ok=True)
         oTable[iIndex].dTableData.to_csv(filepath, decimal=',',
                                          date_format='%Y.%m.%d')
