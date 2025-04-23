@@ -455,26 +455,26 @@ class SQL:
         :return:
         """
         dfb = pd.read_sql_query(
-            "SELECT SecurityGroups.title, "
+            "SELECT PortfolioTool.type_tool, "
             "Portfolio.tool_code, "
             "BordSecurities.SHORTNAME, "
-            "Portfolio.buying_price, "
-            "Portfolio.buying_count "
+            "Portfolio.price, "
+            "Portfolio.count "
             "FROM Portfolio "
-            "JOIN SecurityGroups "
-            "ON SecurityGroups.groups_id=Portfolio.type_tool "
+            "JOIN PortfolioTool "
+            "ON PortfolioTool.id_tool=Portfolio.id_tool "
             "JOIN BordSecurities "
             "ON BordSecurities.SECID=Portfolio.tool_code;",
             self.oConnector)
 
         dfs = pd.read_sql_query(
-            "SELECT SecurityGroups.title, Portfolio.tool_code, "
+            "SELECT PortfolioTool.type_tool, Portfolio.tool_code, "
             "SharesCollections.SHORTNAME, "
-            "Portfolio.buying_price, "
-            "Portfolio.buying_count "
+            "Portfolio.price, "
+            "Portfolio.count "
             "FROM Portfolio "
-            "JOIN SecurityGroups "
-            "ON SecurityGroups.groups_id=Portfolio.type_tool "
+            "JOIN PortfolioTool "
+            "ON PortfolioTool.id_tool=Portfolio.id_tool "
             "JOIN SharesCollections "
             "ON SharesCollections.SECID=Portfolio.tool_code; ",
             self.oConnector)

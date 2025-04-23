@@ -22,8 +22,8 @@ from PyQt6.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QTableView
 
-from advisor.lib.constants import COLOR
-from advisor.lib.math import bring_number_into_range
+from advisor.lib.constants import COLORYIELD, COLODMATDATE
+from advisor.lib.math import bring_number_into_range, years
 
 
 class PandasModel(QAbstractTableModel):
@@ -68,7 +68,7 @@ class PandasModel(QAbstractTableModel):
             if role == Qt.ItemDataRole.BackgroundRole:
                 fValue = self._DataFrame.iloc[index.row(), index.column()]
                 if isinstance(fValue, int) or isinstance(fValue, float):
-                    lColor = COLOR.copy()
+                    lColor = COLORYIELD.copy()
                     if (self._DataFrame.columns[index.column()] == 'Цена, %' or
                             self._DataFrame.columns[index.column()] == 'НКД'):
                         lColor.reverse()
@@ -84,6 +84,20 @@ class PandasModel(QAbstractTableModel):
                                                          fMax, min_dest=20)
 
                     return QColor(lColor[iValue])
+
+                if self._DataFrame.columns[index.column()] == 'Дата погашения':
+                    lColor = COLODMATDATE.copy()
+                    fYears = years(self._DataFrame.iloc[
+                                       index.row(), index.column()
+                                   ])
+                    if fYears < 1:
+                        return QColor(lColor[0])
+                    elif 1 < fYears < 3:
+                        return QColor(lColor[1])
+                    elif 3 <= fYears < 7:
+                        return QColor(lColor[2])
+
+                    return QColor(lColor[3])
 
         return None
 

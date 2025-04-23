@@ -225,6 +225,12 @@ def sum_pandas(dataframe):
         'tool_code', as_index=False).agg({'buying_count': 'sum'})
 
 
+def years(sDate):
+    oDate = datetime.strptime(sDate, '%Y-%m-%d')
+    fYears = (oDate - today()).days / DAYS
+    return fYears
+
+
 def weighted_average_pandas(dataframe):
     k = ''
     oSeries = pd.Series()
@@ -233,8 +239,8 @@ def weighted_average_pandas(dataframe):
             continue
         k = x
         df = dataframe.loc[dataframe['tool_code'] == x]
-        val = df['buying_price']
-        wt = df['buying_count']
+        val = df['price']
+        wt = df['count']
         oSeries = pd.concat([oSeries, pd.Series(
             ((val * wt).sum() / wt.sum())
         )])
