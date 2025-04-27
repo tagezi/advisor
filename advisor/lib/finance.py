@@ -92,7 +92,7 @@ class Inflation:
         iYear = int(datetime.today().strftime('%Y'))
         oInflation = self.oInflation
 
-        if self.oInflation['year'].min() < (iYear - iYears):
+        if self.oInflation['year'].min() <= (iYear - iYears):
             oInflation = self.oInflation.loc[(self.oInflation['year']
                                               > (iYear - iYears))]
         return oInflation
