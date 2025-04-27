@@ -50,7 +50,7 @@ def import_csv_reports(sFile=fFile, sCompanyName=sName, oConnector=oConn):
 
     sColumns = ', '.join(new_column)
     for tValues in Llist:
-        oConnector.insert_row('Emitter', sColumns, tValues)
+        oConnector.insert_row('EmitterReporting', sColumns, tValues)
 
 
 def update_emitter():
