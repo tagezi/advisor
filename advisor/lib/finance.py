@@ -19,9 +19,6 @@
 from datetime import datetime
 import pandas as pd
 
-from advisor.lib.constants import FILE_DB
-from advisor.lib.sql import SQL
-
 
 class Inflation:
     def __init__(self, oConnector):
@@ -46,7 +43,7 @@ class Inflation:
         """
         pass
 
-    def inflation_for_5(self):
+    def inflation_average_for_5(self):
         """ Средне арифметическая инфляция за 5 лет
 
         :rtype: float
@@ -55,7 +52,7 @@ class Inflation:
 
         return round(oInflationFor5['inflation'].mean(), 4)
 
-    def inflation_for_10(self):
+    def inflation_average_for_10(self):
         """ Средне арифметическая инфляция за 10 лет
 
         :rtype: float
@@ -100,11 +97,3 @@ class Inflation:
 
 if __name__ == '__main__':
     pass
-    # oConn = SQL(FILE_DB)
-    # inf = Inflation(oConn)
-    # print(inf.get_inflation_list())
-    # print(inf.inflation_for_5())
-    # print(inf.inflation_for_10())
-    # print(inf.inflation_median_for_5())
-    # print(inf.inflation_median_for_10())
-    # print(inf.inflation_for_per(12))
