@@ -25,8 +25,8 @@ from dateutil.utils import today
 
 from advisor.lib.connect import connect
 from advisor.lib.constants import FILE_DB
+from advisor.lib.service_lib import Connector
 from advisor.lib.sql import SQL
-
 
 """
 https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json
@@ -61,11 +61,10 @@ price_url = f"https://iss.moex.com/iss/history/engines/stock/markets/bonds/board
 """
 
 
-class MOEX:
-    def __init__(self, oConnect=None):
-        self.oConnect = oConnect
-        if not oConnect:
-            self.oConnect = SQL(FILE_DB)
+class MOEX(Connector):
+    def __init__(self, oConnector=None):
+        super().__init__(oConnector)
+
         self.sDomaine = 'https://iss.moex.com/'
         self.sFaild = 'iss/'
 
@@ -143,11 +142,9 @@ class MOEX:
         return oDatesAndCouponList
 
 
-class MOEXUpdate:
-    def __init__(self, oConnect=None):
-        self.oConnect = oConnect
-        if not oConnect:
-            self.oConnect = SQL(FILE_DB)
+class MOEXUpdate(Connector):
+    def __init__(self, oConnector=None):
+        super().__init__(oConnector)
         if not self.check_update():
             self.update_master_data()
 
@@ -159,14 +156,14 @@ class MOEXUpdate:
         jJSON = connect(sURL)
 
         # Bord Securities
-        self.update_markets_bonds(jJSON=jJSON,
-                                  sField='securities',
-                                  sTable='BordSecurities')
+        self.update_data(jJSON=jJSON,
+                         sField='securities',
+                         sTable='BordSecurities')
 
         # Market Data Yields
-        self.update_markets_bonds(jJSON=jJSON,
-                                  sField='marketdata_yields',
-                                  sTable='MarketDataYields')
+        self.update_data(jJSON=jJSON,
+                         sField='marketdata_yields',
+                         sTable='MarketDataYields')
 
     def get_markets_shares(self):
         """ Получает таблицу инструментов торговой сессии по рынку акций
@@ -175,55 +172,54 @@ class MOEXUpdate:
                 'iss/engines/stock/markets/shares/securities.json')
         jJSON = connect(sURL)
 
-        # Bord Securities
-        self.update_markets_bonds(jJSON=jJSON,
-                                  sField='securities',
-                                  sTable='SharesSecurities')
+        # Shares Securities
+        self.update_data(jJSON=jJSON,
+                         sField='securities',
+                         sTable='SharesSecurities')
 
-        # Market Data Yields
-        self.update_markets_bonds(jJSON=jJSON,
-                                  sField='marketdata_yields',
-                                  sTable='MarketDataYields')
+        # Shares Market Data
+        self.update_data(jJSON=jJSON,
+                         sField='marketdata_yields',
+                         sTable='SharesMarketData')
 
-    def update_markets_bonds(self, jJSON, sField, sTable):
+    def update_data(self, jJSON, sField, sTable):
 
         sColumns = ', '.join(jJSON[sField]['columns'])
         lAllData = jJSON[sField]['data']
         for lData in lAllData:
-            bIsSECID = self.oConnect.check_value(sTable=sTable,
-                                                 sGet='SECID',
-                                                 sWhere='SECID',
-                                                 aValue=lData[0])
+            bIsSECID = self.oConnector.check_value(sTable=sTable,
+                                                   sGet='SECID',
+                                                   sWhere='SECID',
+                                                   aValue=lData[0])
             if not bIsSECID:
                 self.insert_rows(sTable, sColumns, lData)
 
-            bNotUpdated = self.oConnect.check_update(sTable=sTable,
-                                                     sColumns=sColumns,
-                                                     sWhere='SECID',
-                                                     lValues=lData)
+            bNotUpdated = self.oConnector.check_update(sTable=sTable,
+                                                       sColumns=sColumns,
+                                                       sWhere='SECID',
+                                                       lValues=lData)
             if not bNotUpdated:
                 lData.append(lData[0])
                 lData.pop(0)
-                self.oConnect.update(sTable=sTable,
-                                     sSetUpdate=sColumns[6:],
-                                     sWhereUpdate='SECID',
-                                     tValues=lData)
+                self.oConnector.update(sTable=sTable,
+                                       sSetUpdate=sColumns[6:],
+                                       sWhereUpdate='SECID',
+                                       tValues=lData)
 
     def get_bond_description(self, sSECID=''):
-        lSECIDList = []
         if not sSECID:
             lSECIDList = (
-                self.oConnect.sql_get_values('BordSecurities',
-                                             'SECID',
-                                             'MATDATE>',
-                                             (today().strftime("%Y-%m-%d"),))
+                self.oConnector.sql_get_values('BordSecurities',
+                                               'SECID',
+                                               'MATDATE>',
+                                               (today().strftime("%Y-%m-%d"),))
             )
 
             for sSECID in lSECIDList:
-                bSECID = self.oConnect.check_value('BondDescription',
-                                                   'SECID',
-                                                   'SECID',
-                                                   sSECID[0])
+                bSECID = self.oConnector.check_value('BondDescription',
+                                                     'SECID',
+                                                     'SECID',
+                                                     sSECID[0])
                 if not bSECID:
                     sURL = f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
                     jJSON = connect(sURL,
@@ -242,9 +238,9 @@ class MOEXUpdate:
 
                     sColumns = ', '.join(oJSON['name'])
                     lValues = oJSON['value'].tolist()
-                    self.oConnect.insert_row('BondDescription',
-                                             sColumns,
-                                             lValues)
+                    self.oConnector.insert_row('BondDescription',
+                                               sColumns,
+                                               lValues)
 
         else:
             sURL = f'https://iss.moex.com/iss/securities/{sSECID}.json'
@@ -291,10 +287,10 @@ class MOEXUpdate:
             sColumns = ', '.join(jJSON['securities']['columns'])
             lAllData = jJSON['securities']['data']
             for lData in lAllData:
-                if not self.oConnect.check_value(sTable,
-                                                 'ISIN',
-                                                 sWhereColumn,
-                                                 lData[5]):
+                if not self.oConnector.check_value(sTable,
+                                                   'ISIN',
+                                                   sWhereColumn,
+                                                   lData[5]):
                     if 'ISIN' not in sColumns:
                         sColumns = sColumns.replace('REGNUMBER,',
                                                     'REGNUMBER, ISIN,')
@@ -310,36 +306,6 @@ class MOEXUpdate:
 
     def return_collection_name(self, sType, iLevel):
         """ Возвращает имя уровня облигации
-
-        ** SecurityCollections **
-
-        - `stock_bonds_all`	             **Все**
-        - `stock_bonds_one` 	         **Все уровень 1**
-        - `stock_bonds_two` 	         **Все уровень 2**
-        - `stock_bonds_three` 	         **Все уровень 3**
-        - `stock_bonds_corp_all` 	     **Все корпоративные**
-        - `stock_bonds_corp_one` 	     **Корпоративные уровень 1**
-        - `stock_bonds_corp_two` 	     **Корпоративные уровень 2**
-        - `stock_bonds_corp_three` 	     **Корпоративные уровень 3**
-        - `stock_bonds_exchange_all` 	 **Все биржевые**
-        - `stock_exchange_corp_one` 	 **Биржевые уровень 1**
-        - `stock_bonds_exchange_two` 	 **Биржевые уровень 2**
-        - `stock_bonds_exchange_three` 	 **Биржевые уровень 3**
-        - `stock_bonds_municipal_all`    **Все муниципальные**
-        - `stock_bonds_municipal_one` 	 **Муниципальные уровень 1**
-        - `stock_bonds_municipal_two` 	 **Муниципальные уровень 2**
-        - `stock_bonds_municipal_three`  **Муниципальные уровень 3**
-        - `stock_bonds_subfederal_all` 	 **Все субъектов РФ**
-        - `stock_bonds_subfederal_one` 	 **Субъектов РФ уровень 1**
-        - `stock_bonds_subfederal_two` 	 **Субъектов РФ уровень 2**
-        - `stock_bonds_subfederal_three` **Субъектов РФ уровень 3**
-        - `stock_bonds_ofz_all` 	     **Все ОФЗ**
-        - `stock_bonds_cb_all` 	         **Все Банка России**
-        - `stock_bonds_ifi_all` 	     **Все иностранных эмитентов**
-        - `stock_bonds_ifi_one` 	     **Иностранных эмитентов уровень 1**
-        - `stock_bonds_ifi_two` 	     **Иностранных эмитентов уровень 2**
-        - `stock_bonds_ifi_three` 	     **Иностранных эмитентов уровень 3**
-        - `offboard_bonds_all` 	         **Все Коммерческие**
 
         :param sType: Тип облигаций
         :type sType: str
@@ -359,10 +325,10 @@ class MOEXUpdate:
             sString = "%s%s" % (sType[0].upper(), sType[1:])
             sValue = f'{sString} уровень {iLevel}'
 
-        sQuery = self.oConnect.select(sTable='SecurityCollections',
-                                      sGet='name',
-                                      sWhere='title',
-                                      tValues=(sValue,))
+        sQuery = self.oConnector.select(sTable='SecurityCollections',
+                                        sGet='name',
+                                        sWhere='title',
+                                        tValues=(sValue,))
 
         return sQuery.fetchone()
 
@@ -372,7 +338,7 @@ class MOEXUpdate:
         :return: возвращает значение обновления
         :rtype: bool
         """
-        lDataUpdate = self.oConnect.sql_get_all('UpdateData')
+        lDataUpdate = self.oConnector.sql_get_all('UpdateData')
         if lDataUpdate:
             dataUpdate = datetime.strptime(lDataUpdate[0][0],
                                            '%Y-%m-%d').date()
@@ -389,18 +355,18 @@ class MOEXUpdate:
         :param lData:
         :return:
         """
-        self.oConnect.insert_row(sTable, sColumns, lData)
+        self.oConnector.insert_row(sTable, sColumns, lData)
 
     def update_row(self, sTable, sSetUpdate, sWhereUpdate, tValues):
-        self.oConnect.update(sTable, sSetUpdate, sWhereUpdate, tValues)
+        self.oConnector.update(sTable, sSetUpdate, sWhereUpdate, tValues)
 
     def update_master_data(self):
         jJSON = connect('http://iss.moex.com/iss.json', start=-1)
 
-        self.oConnect.sql_table_clean(['Engines', 'Markets', 'Boards',
-                                       'Boardgroups', 'Durations',
-                                       'SecurityTypes', 'SecurityGroups',
-                                       'SecurityCollections'])
+        self.oConnector.sql_table_clean(['Engines', 'Markets', 'Boards',
+                                         'Boardgroups', 'Durations',
+                                         'SecurityTypes', 'SecurityGroups',
+                                         'SecurityCollections'])
 
         # Engines
         sColumns = 'engine_id, engine_name, engine_title'
@@ -450,7 +416,7 @@ class MOEXUpdate:
         for lData in jJSON['securitytypes']['data']:
             tData = (lData[0], lData[1], lData[4], lData[5], lData[6],
                      lData[7],)
-            self.oConnect.insert_row('SecurityTypes', sColumns, tData)
+            self.oConnector.insert_row('SecurityTypes', sColumns, tData)
 
         # SecurityCollections
         sColumns = 'collections_id, name, title, security_group_id'
@@ -460,6 +426,7 @@ class MOEXUpdate:
         # Обновление даты обновления
         self.oConnect.update('UpdateData', 'date',
                              'id', (date.today(), 1))
+                               'id', (date.today(), 1))
 
 
 if __name__ == '__main__':

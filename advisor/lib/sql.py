@@ -38,7 +38,7 @@ from advisor.lib.log import start_logging
 from advisor.lib.str import str_get_file_patch
 
 
-def check_connect_db(oConnector, sBasePath, sDBDir):
+def check_connect_db(oConnector, sBasePath, sDBDir, sDBFile):
     """ Checks for the existence of a database and if it does not find it, then
         creates it with default values.
 
@@ -48,6 +48,8 @@ def check_connect_db(oConnector, sBasePath, sDBDir):
     :type sBasePath: str
     :param sDBDir: A dir when database is by default.
     :type sDBDir: str
+    :param sDBFile:
+    :type sDBFile: str
     :return: None
     """
     # The list of tables in DB
@@ -58,7 +60,7 @@ def check_connect_db(oConnector, sBasePath, sDBDir):
                                    (sTable, 'table',)).fetchone()
         if not bExist:
             sDBPath = str_get_file_patch(sBasePath, sDBDir)
-            sFile = str_get_file_patch(sDBPath, 'moex.sql')
+            sFile = str_get_file_patch(sDBPath, sDBFile)
             with open(sFile) as sql_file:
                 sql_script = sql_file.read()
                 oConnector.execute_script(sql_script)
@@ -490,7 +492,8 @@ class SQL:
                            bOFZ=False,
                            bIN=False,
                            iMinPeriod=30,
-                           iMaxPeriod=182
+                           iMaxPeriod=182,
+                           fMinCouponValue=16.00
                            ):
         sQuery = (
             "SELECT BordSecurities.SECID, BordSecurities.ISIN, "
@@ -522,6 +525,7 @@ class SQL:
             sQuery = (
                 f" {sQuery} AND BordSecurities.YIELDATPREVWAPRICE>{fMinYield} "
                 f"AND BordSecurities.YIELDATPREVWAPRICE<{fMaxYield} "
+                f"AND BordSecurities.SECNAME not like \"%ОФЗ%\" "
                 "AND BondDescription.EMITTER not like \"%икрофинансовая%\" "
                 "AND BondDescription.EMITTER not like \"%коллектор%\" "
             )

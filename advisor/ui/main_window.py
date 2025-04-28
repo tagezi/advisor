@@ -258,7 +258,7 @@ class MainWindow(QMainWindow):
         # Инфляция
         oInflation = Inflation(self.oConnector)
         fInflMedian5 = oInflation.inflation_median_for_5()
-        fInflMedian10 = oInflation.inflation_for_10()
+        fInflMedian10 = oInflation.inflation_average_for_10()
         # Отбираем список облигаций
         dTableData = BondAnalysis(self.oConnector)
         oTableData = dTableData.get_bond_by_values(iMinPeriod=iMinPeriod,
@@ -289,7 +289,7 @@ class MainWindow(QMainWindow):
         # Инфляция
         oInflation = Inflation(self.oConnector)
         fInflMedian5 = oInflation.inflation_median_for_5()
-        fInflMedian10 = oInflation.inflation_for_10()
+        fInflMedian10 = oInflation.inflation_average_for_10()
         # Отбираем список облигаций
         dTableData = BondAnalysis(self.oConnector)
         oTableData = dTableData.get_bond_by_values(bOFZ=True)
