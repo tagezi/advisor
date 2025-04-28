@@ -237,12 +237,12 @@ class MainWindow(QMainWindow):
             lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
             lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
         # формируем новую таблицу
-        oTableData.insert(6, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
-        oTableData.insert(7, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
+        oTableData.insert(7, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
+        oTableData.insert(8, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
         oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
 
         oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
-                              'Доходность, %',
+                              'Доходность, %', 'Эффективная, %',
                               '% в год при сред. инфл. за 5л)',
                               '% в год при сред. инфл за 10л)',
                               'Процент купона', 'Значение купона, руб', 'НКД',

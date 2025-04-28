@@ -499,6 +499,7 @@ class SQL:
             "SELECT BordSecurities.SECID, BordSecurities.ISIN, "
             "BordSecurities.SHORTNAME, BordSecurities.MATDATE, "
             "BordSecurities.PREVPRICE, BordSecurities.YIELDATPREVWAPRICE, "
+            "MarketDataYields.EFFECTIVEYIELD, "
             "BordSecurities.COUPONPERCENT, BordSecurities.COUPONVALUE, "
             "BordSecurities.ACCRUEDINT, BordSecurities.NEXTCOUPON, "
             "BordSecurities.COUPONPERIOD, BondDescription.INITIALFACEVALUE, "
@@ -507,6 +508,8 @@ class SQL:
             "FROM BordSecurities "
             "JOIN BondDescription "
             "ON BondDescription.SECID=BordSecurities.SECID "
+            "JOIN MarketDataYields "
+            "ON MarketDataYields.SECID=BordSecurities.SECID "
             f"WHERE BondDescription.INITIALFACEVALUE <= {iInitialFaceValue} "
             f"AND BondDescription.FACEUNIT = \"{sFaceUnit}\" "
             "AND BondDescription.ISQUALIFIEDINVESTORS=0 "
@@ -517,7 +520,8 @@ class SQL:
             "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
             f"AND BordSecurities.COUPONPERIOD>={int(iMinPeriod)} "
             f"AND BordSecurities.COUPONPERIOD<={int(iMaxPeriod)} "
-            )
+            f"AND BordSecurities.COUPONVALUE>={fMinCouponValue} "
+        )
 
         if bOFZ:
             sQuery = f" {sQuery} AND BordSecurities.SECNAME like \"%ОФЗ%\" "
@@ -528,6 +532,7 @@ class SQL:
                 f"AND BordSecurities.SECNAME not like \"%ОФЗ%\" "
                 "AND BondDescription.EMITTER not like \"%икрофинансовая%\" "
                 "AND BondDescription.EMITTER not like \"%коллектор%\" "
+                "AND BondDescription.EMITTER not like \"ООО %\" "
             )
 
         sQuery = (f"{sQuery} AND BordSecurities.SECNAME not like \"%ОФЗ-АД%\" "
@@ -562,9 +567,11 @@ class SQL:
             "AND BordSecurities.COUPONPERCENT > 1 "
             f"AND BordSecurities.MATDATE > \"{sMatDateStart}\" "
             f"AND BordSecurities.COUPONPERIOD<={int(iMaxPeriod)} "
+            f"AND BordSecurities.COUPONPERIOD<={int(iMaxPeriod)} "
             "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
             "AND BondDescription.EMITTER not like \"%икрофинансовая%\" "
             "AND BondDescription.EMITTER not like \"%коллектор%\" "
+            "AND BondDescription.EMITTER not like \"%ООО%\" "
             "order by COUPONPERIOD;")
 
         return lAnswer
