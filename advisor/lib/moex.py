@@ -424,8 +424,7 @@ class MOEXUpdate(Connector):
             self.insert_rows('SecurityCollections', sColumns, lData)
 
         # Обновление даты обновления
-        self.oConnect.update('UpdateData', 'date',
-                             'id', (date.today(), 1))
+        self.oConnector.update('UpdateData', 'date',
                                'id', (date.today(), 1))
 
 
