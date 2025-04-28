@@ -77,7 +77,7 @@ class MainWindow(QMainWindow):
             sDBPath = str_get_file_patch(sDBPath, sDBFile)
 
         self.oConnector = SQL(sDBPath)
-        check_connect_db(self.oConnector, sBasePath, sDBDir)
+        check_connect_db(self.oConnector, sBasePath, sDBDir, sDBFile)
         self.setWindowTitle('Advisor')
         self.oCentralWidget = TabWidget(self)
         self.onPortfolio()
