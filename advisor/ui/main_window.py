@@ -23,8 +23,7 @@ from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow
 from dateutil.utils import today
 
-from advisor.lib.bond_analysis import BondAnalysis
-from advisor.lib.finance import Inflation
+from advisor.lib.bond_analysis import bond_analysis_without, bond_analysis_ofz
 from advisor.lib.moex import MOEXUpdate
 from advisor.lib.portfolio import Portfolio
 from advisor.ui.help_dialog import About
@@ -33,8 +32,6 @@ from advisor.ui.tab_widget import TabWidget
 from advisor.ui.table_widget import TableWidget
 
 from advisor.lib.config import ConfigProgram
-from advisor.lib.math import ofz_bond_profit, ofz_bond_profit_percent, \
-    percent_year, by_inflation, price_normalization, face_value_inflation
 from advisor.lib.sql import SQL, check_connect_db
 from advisor.lib.str import str_get_file_patch
 from advisor.ui.tool_dialogs import SelectBondsDialog
@@ -169,140 +166,26 @@ class MainWindow(QMainWindow):
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
 
-    @staticmethod
-    def get_data(oTableData, sSECID):
-        # Выбираем строку и подготавливаем её
-        oRowData = oTableData.loc[oTableData['SECID'] == sSECID]
-        oRowData = oRowData.set_index('SECID')
-        # Текущий номинал
-        iFaceValue = oRowData.loc[sSECID, 'FACEVALUE']
-        # Цена предыдущего дня
-        fPrice = oRowData.loc[sSECID, 'PREVPRICE']
-        # НКД
-        fACC = oRowData.loc[sSECID, 'ACCRUEDINT']
-        # Дата погашения
-        sMatDate = oRowData.loc[sSECID, 'MATDATE']
-        # переводим цену из процентов в валюту номинала
-        fPrice = price_normalization(fPrice, iFaceValue)
-
-        return fPrice, fACC, sMatDate
-
-    def bond_analysis(self, dTableData, oTableData,
-                      fInflMedian5, fInflMedian10,
-                      iMinPeriod=30, iMaxPeriod=181):
-        """
-
-        :param dTableData:
-        :param oTableData:
-        :type oTableData: pd.DataFrame
-        :param fInflMedian5: медианная инфляция за 5 лет
-        :type fInflMedian5: float
-        :param fInflMedian10: медианная инфляция за 10 лет
-        :type fInflMedian10: float
-        :return:
-        :rtype: pd.DataFrame
-        """
-        # IAPPY - Inflation-adjusted profit as a percentage in year
-        lIAPPY5Tax, lIAPPY10Tax = [], []
-        for sSECID in oTableData['SECID']:
-            bAmort = dTableData.get_check_amort(sSECID=sSECID)
-            if bAmort:
-                oTableData.drop(
-                    oTableData[
-                        oTableData['SECID'] == sSECID].index, inplace=True
-                )
-                continue
-
-            fPrice, fACC, sMatDate = self.get_data(oTableData, sSECID)
-            oUpCoupons = dTableData.get_future_coupons(sSECID=sSECID)
-            # высчитываем значения и купоны с учетом инфляции
-            fFaceValue5 = face_value_inflation(fInflMedian5, oUpCoupons)
-            lInflUpCoupons5 = by_inflation(fInflMedian5, oUpCoupons)
-            fFaceValue10 = face_value_inflation(fInflMedian10, oUpCoupons)
-            lInflUpCoupons10 = by_inflation(fInflMedian10, oUpCoupons)
-            # находим сумму купонов
-            fInfSumValue5 = sum(lInflUpCoupons5)
-            fInfSumValue10 = sum(lInflUpCoupons10)
-            # высчитываем прибыль с учетом комиссий и налога
-            fProfitInfl5Tax = ofz_bond_profit(fInfSumValue5, fACC, fFaceValue5,
-                                              fPrice, sDate=sMatDate,
-                                              bTax=True)
-            fProfitInfl10Tax = ofz_bond_profit(fInfSumValue10, fACC,
-                                               fFaceValue10, fPrice,
-                                               sDate=sMatDate, bTax=True)
-            # Считаем доход в процентах
-            fIAPP5Tax = ofz_bond_profit_percent(fProfitInfl5Tax, fPrice)
-            fIAPP10Tax = ofz_bond_profit_percent(fProfitInfl10Tax, fPrice)
-            # считаем доход в процентах в год
-            lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
-            lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
-        # формируем новую таблицу
-        oTableData.insert(7, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
-        oTableData.insert(8, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
-        oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
-
-        oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
-                              'Доходность, %', 'Эффективная, %',
-                              '% в год при сред. инфл. за 5л)',
-                              '% в год при сред. инфл за 10л)',
-                              'Процент купона', 'Значение купона, руб', 'НКД',
-                              'Следующий купон', 'Период купона',
-                              'Начальный номинал', 'Текущий номинал',
-                              'Уровень листинга', 'Эмитент']
-        oTableData = oTableData[
-            oTableData['% в год при сред. инфл. за 5л)'] > 0]
-
-        return oTableData
-
-    def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
-        # Инфляция
-        oInflation = Inflation(self.oConnector)
-        fInflMedian5 = oInflation.inflation_median_for_5()
-        fInflMedian10 = oInflation.inflation_average_for_10()
-        # Отбираем список облигаций
-        dTableData = BondAnalysis(self.oConnector)
-        oTableData = dTableData.get_bond_by_values(iMinPeriod=iMinPeriod,
-                                                   iMaxPeriod=iMaxPeriod,
-                                                   fPercent=fPercent)
-        oTableData = self.bond_analysis(dTableData,
-                                        oTableData,
-                                        fInflMedian5,
-                                        fInflMedian10)
-        oTableData = oTableData.dropna()
-
-        # запускаем всю эту херь
-        oTableWidget = TableWidget(oTableData, True)
-        self.oCentralWidget.add_tab(oTableWidget, 'Список облигаций')
-
     def get_period_list(self):
         tList = self.oConnector.get_period_list()
 
         return [str(tRow[0]) for tRow in tList]
+
+    def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
+        oTableData = bond_analysis_without(self.oConnector,
+                                           iMinPeriod,
+                                           iMaxPeriod,
+                                           fPercent)
+
+        # запускаем всю эту херь
+        oTableWidget = TableWidget(oTableData, True)
+        self.oCentralWidget.add_tab(oTableWidget, 'Список облигаций')
 
     def onBoundSelect(self):
         oSelectBondsDialog = SelectBondsDialog(self.oConnector)
         oSelectBondsDialog.exec()
         lData = oSelectBondsDialog.GetValue()
         self.onBondAnalysis(lData[0], lData[1], lData[2])
-
-    def onOFZBondAnalysis(self):
-        # Инфляция
-        oInflation = Inflation(self.oConnector)
-        fInflMedian5 = oInflation.inflation_median_for_5()
-        fInflMedian10 = oInflation.inflation_average_for_10()
-        # Отбираем список облигаций
-        dTableData = BondAnalysis(self.oConnector)
-        oTableData = dTableData.get_bond_by_values(bOFZ=True)
-
-        oTableData = self.bond_analysis(dTableData,
-                                        oTableData,
-                                        fInflMedian5,
-                                        fInflMedian10)
-
-        # запускаем всю эту херь
-        oTableWidget = TableWidget(oTableData, True)
-
-        self.oCentralWidget.add_tab(oTableWidget, 'Список ОФЗ')
 
     def onDisplayAbout(self):
         """ Method open dialog window with information about the program. """
@@ -332,6 +215,13 @@ class MainWindow(QMainWindow):
         filepath.parent.mkdir(parents=True, exist_ok=True)
         oTable[iIndex].dTableData.to_csv(filepath, decimal=',',
                                          date_format='%Y.%m.%d')
+
+    def onOFZBondAnalysis(self):
+        oTableData = bond_analysis_ofz(self.oConnector)
+
+        # запускаем всю эту херь
+        oTableWidget = TableWidget(oTableData, True)
+        self.oCentralWidget.add_tab(oTableWidget, 'Список ОФЗ')
 
     def onOpenDB(self):
         pass
