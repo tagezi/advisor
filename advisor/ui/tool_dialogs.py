@@ -17,6 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout
+import numpy as np
 
 from advisor.ui.dialog_elements import ADialogApplyButtons, VComboBox, VLineEdit
 
