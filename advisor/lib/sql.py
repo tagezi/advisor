@@ -493,7 +493,8 @@ class SQL:
                            bIN=False,
                            iMinPeriod=30,
                            iMaxPeriod=182,
-                           fMinCouponValue=16.00
+                           fMinCouponValue=16.00,
+                           fPercent=1.0
                            ):
         sQuery = (
             "SELECT BordSecurities.SECID, BordSecurities.ISIN, "
@@ -514,8 +515,9 @@ class SQL:
             f"AND BondDescription.FACEUNIT = \"{sFaceUnit}\" "
             "AND BondDescription.ISQUALIFIEDINVESTORS=0 "
             "AND BordSecurities.PREVPRICE is not NULL "
-            "AND BordSecurities.OFFERDATE is NULL "
+            # "AND BordSecurities.OFFERDATE is NULL "
             "AND BordSecurities.COUPONPERCENT>1 "
+            f"AND BordSecurities.COUPONPERCENT>={fPercent} "
             "AND BordSecurities.MATDATE>\"2025-09-01\" "
             "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
             f"AND BordSecurities.COUPONPERIOD>={int(iMinPeriod)} "

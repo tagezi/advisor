@@ -254,7 +254,7 @@ class MainWindow(QMainWindow):
 
         return oTableData
 
-    def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181):
+    def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
         # Инфляция
         oInflation = Inflation(self.oConnector)
         fInflMedian5 = oInflation.inflation_median_for_5()
@@ -262,7 +262,8 @@ class MainWindow(QMainWindow):
         # Отбираем список облигаций
         dTableData = BondAnalysis(self.oConnector)
         oTableData = dTableData.get_bond_by_values(iMinPeriod=iMinPeriod,
-                                                   iMaxPeriod=iMaxPeriod)
+                                                   iMaxPeriod=iMaxPeriod,
+                                                   fPercent=fPercent)
         oTableData = self.bond_analysis(dTableData,
                                         oTableData,
                                         fInflMedian5,
@@ -281,9 +282,8 @@ class MainWindow(QMainWindow):
     def onBoundSelect(self):
         oSelectBondsDialog = SelectBondsDialog(self.oConnector)
         oSelectBondsDialog.exec()
-        oSelectBondsDialog.GetValue()
-        lPeriods = oSelectBondsDialog.GetValue()
-        self.onBondAnalysis(lPeriods[0], lPeriods[1])
+        lData = oSelectBondsDialog.GetValue()
+        self.onBondAnalysis(lData[0], lData[1], lData[2])
 
     def onOFZBondAnalysis(self):
         # Инфляция

@@ -33,8 +33,10 @@ class ASelectBondsDialog(ADialogApplyButtons):
         self.oHLayoutTaxon = None
         self.oComboMin = None
         self.oComboMax = None
-        self.sMin = ''
-        self.sMax = ''
+        self.oComboPercent = None
+        self.iMin = int
+        self.iMax = int
+        self.fPercent = float
 
         self.init_UI()
         self.fill_combobox()
@@ -44,10 +46,12 @@ class ASelectBondsDialog(ADialogApplyButtons):
         """ initiating a dialog view """
         self.oComboMin = VComboBox('Минимальный период:', 50)
         self.oComboMax = VComboBox('Максимальный период', 50)
+        self.oComboPercent = VComboBox('Минимальная доходность', 50)
 
         oVLayoutPeriod = QVBoxLayout()
         oVLayoutPeriod.addLayout(self.oComboMin)
         oVLayoutPeriod.addLayout(self.oComboMax)
+        oVLayoutPeriod.addLayout(self.oComboPercent)
 
         self.oHLayoutTaxon = QHBoxLayout()
         self.oHLayoutTaxon.addLayout(oVLayoutPeriod)
@@ -61,6 +65,7 @@ class ASelectBondsDialog(ADialogApplyButtons):
         """ Clears all fields after use. """
         self.oComboMin.clear_list()
         self.oComboMax.clear_list()
+        self.oComboPercent.clear_list()
 
     def create_period_list(self):
         """ Creates a list of taxon names for further use in dialog elements.
@@ -76,25 +81,29 @@ class ASelectBondsDialog(ADialogApplyButtons):
         """ Fills the fields with the drop-down list during the first
         initialization and after applying the Apply button."""
         lStatuses = self.create_period_list()
+        lPercent = list(map(str, np.arange(1, 22, 0.5).tolist()))
         self.oComboMin.set_combo_list(lStatuses)
         self.oComboMax.set_combo_list(lStatuses)
+        self.oComboPercent.set_combo_list(lPercent)
 
         self.oComboMin.set_text(lStatuses[0])
         self.oComboMax.set_text(lStatuses[-1])
+        self.oComboPercent.set_text(lPercent[0])
 
     def onClickApply(self):
-        self.sMin = self.oComboMin.get_text()
-        self.sMax = self.oComboMax.get_text()
+        self.iMin = int(self.oComboMin.get_text())
+        self.iMax = int(self.oComboMax.get_text())
+        self.fPercent = float(self.oComboPercent.get_text())
 
-        if self.sMin > self.sMax:
-            sTemp = self.sMin
-            self.sMin = self.sMax
-            self.sMax = sTemp
+        if self.iMin > self.iMax:
+            sTemp = self.iMin
+            self.iMin = self.iMax
+            self.iMax = sTemp
 
         self.clean_field()
         self.fill_combobox()
 
-        self.result = [self.sMin, self.sMax]
+        self.result = [self.iMin, self.iMax, self.fPercent]
 
     def GetValue(self):
         return self.result
