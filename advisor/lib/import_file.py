@@ -40,7 +40,7 @@ def import_csv_reports(sFile=fFile, sCompanyName=sName, oConnector=oConn):
     for sIndexRu in lReportIndexes:
         lSearchIndexRu = sIndexRu.rsplit(',', 2)
         sSearchIndexRu = lSearchIndexRu[0]
-        sQuery = oConnector.sql_get_values('EmitterDict',
+        sQuery = oConnector.sql_get_values('IssuerDict',
                                            'field_index',
                                            'field_index_ru',
                                            (sSearchIndexRu,))
@@ -50,7 +50,7 @@ def import_csv_reports(sFile=fFile, sCompanyName=sName, oConnector=oConn):
 
     sColumns = ', '.join(new_column)
     for tValues in Llist:
-        oConnector.insert_row('EmitterReporting', sColumns, tValues)
+        oConnector.insert_row('IssuerReporting', sColumns, tValues)
 
 
 def update_emitter():
