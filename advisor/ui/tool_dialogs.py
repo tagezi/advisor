@@ -19,7 +19,7 @@
 from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout
 import numpy as np
 
-from advisor.ui.dialog_elements import ADialogApplyButtons, VComboBox, VLineEdit
+from advisor.ui.dialog_elements import ADialogApplyButtons, VComboBox
 
 
 class ASelectBondsDialog(ADialogApplyButtons):
@@ -69,26 +69,24 @@ class ASelectBondsDialog(ADialogApplyButtons):
         self.oComboPercent.clear_list()
 
     def create_period_list(self):
-        """ Creates a list of taxon names for further use in dialog elements.
+        """ Creates a list of dates for further use in dialog elements.
 
-        :return: A list in form - (Taxon Rank) Taxon Name
+        :return: A list of bond maturity date
         :type: list[str]
         """
-        tRows = self.oConnector.get_period_list()
-
-        return [str(tRow[0]) for tRow in tRows]
+        return [str(tRow[0]) for tRow in self.oConnector.get_period_list()]
 
     def fill_combobox(self):
         """ Fills the fields with the drop-down list during the first
         initialization and after applying the Apply button."""
-        lStatuses = self.create_period_list()
+        lPeriod = self.create_period_list()
         lPercent = list(map(str, np.arange(1, 22, 0.5).tolist()))
-        self.oComboMin.set_combo_list(lStatuses)
-        self.oComboMax.set_combo_list(lStatuses)
+        self.oComboMin.set_combo_list(lPeriod)
+        self.oComboMax.set_combo_list(lPeriod)
         self.oComboPercent.set_combo_list(lPercent)
 
-        self.oComboMin.set_text(lStatuses[0])
-        self.oComboMax.set_text(lStatuses[-1])
+        self.oComboMin.set_text(lPeriod[0])
+        self.oComboMax.set_text(lPeriod[-1])
         self.oComboPercent.set_text(lPercent[0])
 
     def onClickApply(self):
@@ -111,7 +109,7 @@ class ASelectBondsDialog(ADialogApplyButtons):
 
 
 class SelectBondsDialog(ASelectBondsDialog):
-    """ Dialog window which adds information on new taxon. """
+    """ Dialog window for selecting parameters. """
 
     def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
@@ -120,7 +118,7 @@ class SelectBondsDialog(ASelectBondsDialog):
     def init_UI(self):
         """ Creating a dialog window. """
         super().init_UI()
-        self.setWindowTitle('Add new taxon to tree')
+        self.setWindowTitle('Выбор параметров')
         self.setModal(True)
 
         oVLayout = QVBoxLayout()

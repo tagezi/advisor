@@ -166,11 +166,6 @@ class MainWindow(QMainWindow):
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
 
-    def get_period_list(self):
-        tList = self.oConnector.get_period_list()
-
-        return [str(tRow[0]) for tRow in tList]
-
     def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
         oTableData = bond_analysis_without(self.oConnector,
                                            iMinPeriod,
