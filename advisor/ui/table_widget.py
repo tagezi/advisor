@@ -139,7 +139,7 @@ class TableWidget(QTableView):
         if item.column() == 0 and sItem != 'Акции' and sItem != 'Облигации':
             webbrowser.open_new_tab(
                 f'https://www.moex.com/ru/issue.aspx?code={item.data()}')
-        if item.column() == 15:
+        if item.column() == 16:
             webbrowser.open_new_tab(
                 f'https://www.google.com/search?q={item.data()}')
 
