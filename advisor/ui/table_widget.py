@@ -133,12 +133,12 @@ class TableWidget(QTableView):
     def actions_connect(self):
         self.doubleClicked.connect(self.onOpenSESID)
 
-    @staticmethod
-    def onOpenSESID(item):
+    def onOpenSESID(self, item):
         sItem = item.data()
         if item.column() == 0 and sItem != 'Акции' and sItem != 'Облигации':
-            webbrowser.open_new_tab(
-                f'https://www.moex.com/ru/issue.aspx?code={item.data()}')
+            self.window().onBondInfo(sItem)
+            # webbrowser.open_new_tab(
+            #     f'https://www.moex.com/ru/issue.aspx?code={item.data()}')
         if item.column() == 16:
             webbrowser.open_new_tab(
                 f'https://www.google.com/search?q={item.data()}')

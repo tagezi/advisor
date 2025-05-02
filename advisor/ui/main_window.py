@@ -27,6 +27,7 @@ from advisor.lib.bond_analysis import bond_analysis_without, bond_analysis_ofz
 from advisor.lib.moex import MOEXUpdate
 from advisor.lib.portfolio import Portfolio
 from advisor.ui.help_dialog import About
+from advisor.ui.html_pages import InfoBonds
 from advisor.ui.setting_dialog import SettingDialog
 from advisor.ui.tab_widget import TabWidget
 from advisor.ui.table_widget import TableWidget
@@ -105,6 +106,11 @@ class MainWindow(QMainWindow):
         self.oBondAnalysis = QAction('Таблица облигаций')
         self.oOFZBondAnalysis = QAction('Таблица ОФЗ')
 
+        # Info
+        self.oBoundInfo = QAction('Облигация')
+        self.oShareInfo = QAction('Акция')
+        self.oIssuerInfo = QAction('Эмитент')
+
         # Help
         self.oOpenHelp = QAction('Справка....', self)
         self.oAbout = QAction('О программе...', self)
@@ -133,6 +139,12 @@ class MainWindow(QMainWindow):
         oFileMenu.addSeparator()
         oTools.addAction(self.oBondAnalysis)
         oTools.addAction(self.oOFZBondAnalysis)
+
+        # Create Info menu
+        oInfo = oMenuBar.addMenu('&Данные')
+        oInfo.addAction(self.oBoundInfo)
+        oInfo.addAction(self.oShareInfo)
+        oInfo.addAction(self.oIssuerInfo)
 
         # Create Help menu
         oHelpMenu = oMenuBar.addMenu('&Справка')
@@ -175,6 +187,10 @@ class MainWindow(QMainWindow):
         # запускаем всю эту херь
         oTableWidget = TableWidget(oTableData, True)
         self.oCentralWidget.add_tab(oTableWidget, 'Список облигаций')
+
+    def onBondInfo(self, sSECID):
+        oBondInfo = InfoBonds(self.oConnector, sSECID)
+        self.oCentralWidget.add_tab(oBondInfo, sSECID)
 
     def onBoundSelect(self):
         oSelectBondsDialog = SelectBondsDialog(self.oConnector)
