@@ -190,8 +190,18 @@ class InfoBonds(HTMLPage):
         self.oHTML.set_title_doc('Новости об эмитенте', 3)
         sQuery = dBonds['EMITTER'].replace('"', '')
         sLink = (f'https://www.google.com/search?q={sQuery}'
-                 f'&num=10&newwindow=1&channel=fs&tbm=nws&sclient=gws-wiz-news')
+                 '&num=10&newwindow=1&channel=fs&tbm=nws&sclient=gws-wiz-news')
         self.oHTML.set_link(f'<a href="{sLink}">Google</a>')
+        sLink = (f'https://www.vedomosti.ru/search?query={sQuery}&sort=date'
+                 '&doc_types=materials,press_releases'
+                 '&material_types=news,articles')
+        self.oHTML.set_link(f'<a href="{sLink}">Ведомости</a>')
+        sLink = (f'https://tass.ru/search?text={sQuery}'
+                 '&rubrics=v-strane,ekonomika,politika,nacionalnye-proekty,'
+                 'mezhdunarodnaya-panorama,nedvizhimost,moskva,'
+                 'moskovskaya-oblast,spb-news,ural-news,sibir-news,'
+                 'arktika-segodnya')
+        self.oHTML.set_link(f'<a href="{sLink}">TACC</a>')
 
         self.setText(self.oHTML.get_doc())
 
