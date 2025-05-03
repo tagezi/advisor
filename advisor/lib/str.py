@@ -21,9 +21,26 @@ The module contains a collection of functions for solving routine tasks with
 strings.
 """
 import re
+import locale
 from os.path import splitext, join, normcase, split
 from time import localtime, strftime
 from urllib.parse import urlparse, quote, urlunparse
+
+locale.setlocale(locale.LC_ALL, '')
+
+
+def str_by_locale(aNumber=1000):
+    """
+
+    :param aNumber: число, которое нужно привести к финансовому виду
+    :type aNumber: any
+    :return: строку с числом в финансовом виде
+    :rtype: str
+    """
+    try:
+        return locale._format('%.2f', aNumber, grouping=True, monetary=True)
+    except:
+        return aNumber
 
 
 def str_get_file_patch(sDir, sFile):

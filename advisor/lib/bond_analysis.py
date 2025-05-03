@@ -74,7 +74,7 @@ def bond_analysis(dTableData, oTableData,
             continue
 
         fPrice, fACC, sMatDate = get_data(oTableData, sSECID)
-        oUpCoupons = dTableData.get_future_coupons(sSECID=sSECID)
+        oUpCoupons = dTableData.get_future(sSECID=sSECID, sWhat='coupons')
         # высчитываем значения и купоны с учетом инфляции
         fFaceValue5 = face_value_inflation(fInflMedian5, oUpCoupons)
         lInflUpCoupons5 = by_inflation(fInflMedian5, oUpCoupons)
@@ -233,17 +233,24 @@ class BondAnalysis:
 
         return False
 
-    def get_future_coupons(self, sSECID):
+    def get_future(self, sSECID, sWhat='coupons'):
         """
 
         :param sSECID:
         :type sSECID: str
         :return:DataFrame
         """
-        oCoupons = self.check_is_in_db(sSECID, 'coupons')
-        oFuturesCoupons = oCoupons.loc[(oCoupons['coupon_date'] > self.sTime)]
+        if sWhat == 'coupons':
+            sProperty = 'coupons'
+            sField = 'coupon_date'
+        else:
+            sProperty = 'amort'
+            sField = 'amort_date'
 
-        return oFuturesCoupons
+        oCoupons = self.check_is_in_db(sSECID, sProperty)
+        oFuture = oCoupons.loc[(oCoupons[sField] > self.sTime)]
+
+        return oFuture
 
 
 if __name__ == '__main__':

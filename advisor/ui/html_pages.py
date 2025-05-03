@@ -15,14 +15,17 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import pandas as pd
 from PyQt6.QtWidgets import QTextBrowser
 
+from advisor.lib.bond_analysis import BondAnalysis
 from advisor.lib.constants import BONDFIELDSDICT, BONDFIELDSLIST
+from advisor.lib.math import price_normalization
+from advisor.lib.str import str_by_locale
 
 
 class HTMLDoc:
-    """ Класс содержит методы разбора и оставления строк для формирования
+    """ Класс содержит методы разбора и составления строк для формирования
         HTML документа
 
         **Члены класса**
@@ -34,7 +37,7 @@ class HTMLDoc:
 
     def __init__(self):
         self.lDoc = []
-        self.dLinks = {}
+        self.lLink = []
         self.set_header()
 
     def set_header(self):
@@ -45,12 +48,14 @@ class HTMLDoc:
 
     def set_style(self):
         self.lDoc.append('<style>')
-        self.lDoc.append('table, th, td'
-                         '{'
-                         ' border: 1px solid white;'
-                         ' border-collapse: collapse;'
+        self.lDoc.append('h2 {margin-top: 20px;margin-bottom: 10px;}'
+                         'table, th, td {'
+                         'border: 1px solid white;'
+                         'border-collapse: collapse;'
                          'font-size: 15px;'
+                         'margin-top: 10px;'
                          '}'
+                         '.center { text-align: center; }'
                          )
         self.lDoc.append('</style>')
 
@@ -75,11 +80,11 @@ class HTMLDoc:
         """
         self.lDoc.append(f'{String}<br>')
 
-    def set_table(self, dRows, lHeader=None):
+    def set_dict_to_table(self, dRows, lHeader=None):
         self.lDoc.append('<table>')
         if lHeader:
             self.set_table_header(lHeader)
-        self.set_table_row(dRows)
+        self.set_dict_to_table_row(dRows)
         self.lDoc.append('</table>')
 
     def set_table_header(self, lHeader):
@@ -88,13 +93,27 @@ class HTMLDoc:
             self.lDoc.append(f'<th>{sCell}</th>')
         self.lDoc.append('</tr>')
 
-    def set_table_row(self, dRows):
+    def set_dict_to_table_row(self, dRows):
         for sKey in dRows:
-            if dRows[sKey]:
+            if dRows[sKey] and dRows[sKey] != '0000-00-00':
                 self.lDoc.append('<tr>')
                 self.lDoc.append(f'<td>{BONDFIELDSDICT[sKey]}: </td>')
                 self.lDoc.append(f'<td> {dRows[sKey]}</td>')
                 self.lDoc.append('</tr>')
+
+    @staticmethod
+    def set_df_to_table(oDF, lColumns):
+        for column in oDF:
+            oDF[column] = (oDF[column].apply(lambda x: str_by_locale(x)))
+        oDF.columns = lColumns
+        sHTML = oDF.to_html(index=False)
+        sHTML = sHTML.replace(' style="text-align: right;"', '')
+        sHTML = sHTML.replace('<td>', '<td class="center">')
+
+        return sHTML
+
+    def set_link(self, sLink):
+        self.lDoc.append(f' {sLink} ')
 
     def set_no_data(self):
         self.lDoc.append('!!! Нет данных!!!')
@@ -117,12 +136,63 @@ class InfoBonds(HTMLPage):
     def __init__(self, oConnector, sSECID):
         super().__init__(oConnector, sSECID)
         self._doc(sSECID)
-        self.dField = BONDFIELDSDICT
 
     def _doc(self, sSECID):
         lBond = self.oConnector.get_bond_by_value(sSECID)
         self.oHTML.set_title_doc(f'Облигация {lBond[1]}')
-        self.oHTML.set_table(dict(zip(BONDFIELDSLIST, lBond)))
+        dBonds = dict(zip(BONDFIELDSLIST, lBond))
+        iFaceValue = int
+        for sKey in dBonds:
+            if sKey == 'FACEVALUE':
+                iFaceValue = dBonds[sKey]
+
+            if (sKey == 'PREVWAPRICE' or sKey == 'PREVLEGALCLOSEPRICE'
+                    or sKey == 'WAPRICE' or sKey == 'PREVPRICE'):
+                dBonds[sKey] = price_normalization(float(dBonds[sKey]),
+                                                   iFaceValue)
+
+            if sKey == 'FACEUNIT' or sKey == 'CURRENCYID':
+                dBonds[sKey] = 'рубли'
+
+            if (sKey != 'LOTSIZE' and sKey != 'DECIMALS'
+                    and sKey != 'MINSTEP' and sKey != 'LISTLEVEL'
+                    and sKey != 'ISQUALIFIEDINVESTORS'):
+                dBonds[sKey] = str_by_locale(dBonds[sKey])
+
+            if (sKey == 'ISSUESIZE' or sKey == 'ISSUESIZEPLACED'
+                    or sKey == 'COUPONPERIOD' or sKey == 'DURATION'
+                    or sKey == 'DURATIONWAPRICE'):
+                dBonds[sKey] = dBonds[sKey].split(',')[0]
+
+        self.oHTML.set_dict_to_table(dBonds)
+
+        self.oHTML.set_title_doc('Будущие купоны', 3)
+        oBond = BondAnalysis(self.oConnector, oPD=pd)
+        oFutureCoupons = oBond.get_future(sSECID, 'coupons')
+        lColumns = ['Дата купона', 'Текущий номинал',
+                    'Номинал купона', 'Процент купона']
+        sFutureCoupons = self.oHTML.set_df_to_table(oFutureCoupons, lColumns)
+        self.oHTML.set_string(sFutureCoupons)
+
+        self.oHTML.set_title_doc('Амортизация', 3)
+        oFutureAmort = oBond.get_future(sSECID, 'amort')
+        lColumns = ['Дата амортизации', 'Текущий номинал',
+                    'Процент от наминала', 'Сумма в единицах номинала']
+        sFutureAmort = self.oHTML.set_df_to_table(oFutureAmort, lColumns)
+        self.oHTML.set_string(sFutureAmort)
+
+        self.oHTML.set_title_doc('Страницы облигации', 3)
+        sLink = f'https://www.moex.com/ru/issue.aspx?code={sSECID}'
+        self.oHTML.set_link(f'<a href="{sLink}">ММВБ</a>')
+        sLink = f'https://smart-lab.ru/q/bonds/{sSECID}/'
+        self.oHTML.set_link(f'<a href="{sLink}">Smart-Lab</a>')
+
+        self.oHTML.set_title_doc('Новости об эмитенте', 3)
+        sQuery = dBonds['EMITTER'].replace('"', '')
+        sLink = (f'https://www.google.com/search?q={sQuery}'
+                 f'&num=10&newwindow=1&channel=fs&tbm=nws&sclient=gws-wiz-news')
+        self.oHTML.set_link(f'<a href="{sLink}">Google</a>')
+
         self.setText(self.oHTML.get_doc())
 
 
