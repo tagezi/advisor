@@ -135,7 +135,9 @@ class TableWidget(QTableView):
 
     def onOpenSESID(self, item):
         sItem = item.data()
-        if item.column() == 0 and sItem != 'Акции' and sItem != 'Облигации':
+        if (item.column() == 0 or item.column() == 1
+                and sItem != 'Акции' and sItem != 'Облигации'
+                and sItem != 'Имя'):
             self.window().onBondInfo(sItem)
             # webbrowser.open_new_tab(
             #     f'https://www.moex.com/ru/issue.aspx?code={item.data()}')
