@@ -254,6 +254,4 @@ class BondAnalysis:
 
 
 if __name__ == '__main__':
-    oConn = SQL(FILE_DB)
-    s = BondAnalysis(oConn, pd)
-    s.get_future_coupons('SU26229RMFS3')
+    pass

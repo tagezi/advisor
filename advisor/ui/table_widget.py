@@ -139,8 +139,6 @@ class TableWidget(QTableView):
                 and sItem != 'Акции' and sItem != 'Облигации'
                 and sItem != 'Имя'):
             self.window().onBondInfo(sItem)
-            # webbrowser.open_new_tab(
-            #     f'https://www.moex.com/ru/issue.aspx?code={item.data()}')
         if item.column() == 16:
             webbrowser.open_new_tab(
                 f'https://www.google.com/search?q={item.data()}')

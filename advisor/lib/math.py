@@ -249,5 +249,4 @@ def weighted_average_pandas(dataframe):
 
 
 if __name__ == '__main__':
-    df = pd.DataFrame()
-    print(effective_yield(900, 1000, df, 2))
+    pass
