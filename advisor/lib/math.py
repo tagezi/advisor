@@ -239,8 +239,8 @@ def weighted_average_pandas(dataframe):
             continue
         k = x
         df = dataframe.loc[dataframe['tool_code'] == x]
-        val = df['price']
-        wt = df['count']
+        val = df['tool_price']
+        wt = df['tool_count']
         oSeries = pd.concat([oSeries, pd.Series(
             ((val * wt).sum() / wt.sum())
         )])

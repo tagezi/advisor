@@ -457,28 +457,25 @@ class SQL:
         :return:
         """
         dfb = pd.read_sql_query(
-            "SELECT PortfolioTool.type_tool, "
-            "Portfolio.tool_code, "
-            "BordSecurities.SHORTNAME, "
-            "Portfolio.price, "
-            "Portfolio.count "
-            "FROM Portfolio "
-            "JOIN PortfolioTool "
-            "ON PortfolioTool.id_tool=Portfolio.id_tool "
+            "SELECT Tools.tool_type, AccountEvents.tool_code, "
+            "BordSecurities.SHORTNAME, AccountEvents.tool_price, "
+            "AccountEvents.tool_count "
+            "FROM AccountEvents "
+            "JOIN Tools "
+            "ON Tools.tool_id=AccountEvents.tool_id "
             "JOIN BordSecurities "
-            "ON BordSecurities.SECID=Portfolio.tool_code;",
+            "ON BordSecurities.SECID=AccountEvents.tool_code; ",
             self.oConnector)
 
         dfs = pd.read_sql_query(
-            "SELECT PortfolioTool.type_tool, Portfolio.tool_code, "
-            "SharesCollections.SHORTNAME, "
-            "Portfolio.price, "
-            "Portfolio.count "
-            "FROM Portfolio "
-            "JOIN PortfolioTool "
-            "ON PortfolioTool.id_tool=Portfolio.id_tool "
+            "SELECT Tools.tool_type, AccountEvents.tool_code, "
+            "SharesCollections.SHORTNAME, AccountEvents.tool_price, "
+            "AccountEvents.tool_count "
+            "FROM AccountEvents "
+            "JOIN Tools "
+            "ON Tools.tool_id=AccountEvents.tool_id "
             "JOIN SharesCollections "
-            "ON SharesCollections.SECID=Portfolio.tool_code; ",
+            "ON SharesCollections.SECID=AccountEvents.tool_code; ",
             self.oConnector)
 
         return pd.concat([dfb, dfs], axis=0, join='outer', ignore_index=True)
