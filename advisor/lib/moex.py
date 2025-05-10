@@ -168,8 +168,8 @@ class MOEXUpdate(Connector):
     def get_markets_shares(self):
         """ Получает таблицу инструментов торговой сессии по рынку акций
         """
-        sURL = ('https://iss.moex.com/'
-                'iss/engines/stock/markets/shares/securities.json')
+        sURL = ('https://iss.moex.com/iss/engines/stock/markets/shares/'
+                'boards/TQBR/securities.json')
         jJSON = connect(sURL)
 
         # Shares Securities
@@ -179,7 +179,7 @@ class MOEXUpdate(Connector):
 
         # Shares Market Data
         self.update_data(jJSON=jJSON,
-                         sField='marketdata_yields',
+                         sField='marketdata',
                          sTable='SharesMarketData')
 
     def update_data(self, jJSON, sField, sTable):
@@ -241,6 +241,49 @@ class MOEXUpdate(Connector):
                     self.oConnector.insert_row('BondDescription',
                                                sColumns,
                                                lValues)
+
+        else:
+            sURL = f'https://iss.moex.com/iss/securities/{sSECID}.json'
+            jJSON = connect(sURL)
+
+    def get_shares_description(self, sSECID=''):
+        if not sSECID:
+            lSECIDList = (
+                self.oConnector.sql_get_all('SharesSecurities', 'SECID')
+            )
+
+            for sSECID in lSECIDList:
+                bSECID = self.oConnector.check_value('ShareDescriptions',
+                                                     'SECID',
+                                                     'SECID',
+                                                     sSECID[0])
+                i = 0
+                if not bSECID:
+                    sURL = f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
+                    jJSON = connect(sURL,
+                                    only='description',
+                                    parameter='description.columns',
+                                    values='name,title,value')
+
+                    oJSON = pd.DataFrame(jJSON['description']['data'],
+                                         columns=jJSON['description'][
+                                             'columns'])
+
+                    lCondition = ['SECID', 'NAME', 'SHORTNAME', 'ISIN',
+                                  'REGNUMBER', 'ISSUESIZE', 'FACEVALUE',
+                                  'FACEUNIT', 'LISTLEVEL',
+                                  'ISQUALIFIEDINVESTORS', 'MORNINGSESSION',
+                                  'EVENINGSESSION', 'WEEKENDSESSION',
+                                  'TYPENAME', 'TYPE', 'EMITTER_ID']
+                    oJSON = oJSON[oJSON['name'].isin(lCondition)]
+
+                    sColumns = ', '.join(oJSON['name'])
+                    lValues = oJSON['value'].tolist()
+                    self.oConnector.insert_row('ShareDescriptions',
+                                               sColumns,
+                                               lValues)
+                    i = i + 1
+                    print(i)
 
         else:
             sURL = f'https://iss.moex.com/iss/securities/{sSECID}.json'
@@ -429,5 +472,4 @@ class MOEXUpdate(Connector):
 
 
 if __name__ == '__main__':
-    m = MOEXUpdate()
-    m.get_bond_description()
+    pass
