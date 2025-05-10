@@ -28,38 +28,6 @@ from advisor.lib.constants import FILE_DB
 from advisor.lib.service_lib import Connector
 from advisor.lib.sql import SQL
 
-"""
-https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json
-https://iss.moex.com/iss/securitygroups/stock_bonds/collections
-https://iss.moex.com/iss/securitygroups/stock_bonds/collections/stock_bonds_corp_one/securities
-https://iss.moex.com/iss/securitygroups/stock_bonds/collections/stock_bonds_one/securities?start=0&limit=100
-"""
-"""
-url = (
-                f"https://iss.moex.com/iss/engines/stock/markets/bonds/boardgroups/{t}/securities.json?iss.dp=comma&iss.meta=off&iss.only=securities,marketdata&"
-                "securities.columns=SECID,SECNAME,PREVLEGALCLOSEPRICE&marketdata.columns=SECID,YIELD,DURATION"
-            )
-
-url = (
-            f"https://iss.moex.com/iss/history/engines/stock/markets/bonds/boards/{board_id}/securities/{security_id}.json?"
-            f"iss.meta=off&iss.only=history&history.columns=SECID,TRADEDATE,VOLUME,NUMTRADES&limit=20&from={date_request_previous}"
-        )
-
-url = f"https://iss.moex.com/iss/securities/{security_id}.json?iss.meta=off&iss.only=boards&boards.columns=secid,boardid,is_primary"
-
-url = f"https://iss.moex.com/iss/statistics/engines/stock/markets/bonds/bondization/{security_id}.json?iss.meta=off&iss.only=coupons&start=0&limit=100"
-
-url = f"https://iss.moex.com/iss/securities/{security_id}.json?iss.meta=off&iss.only=description&description.columns=name,title,value"
-
-url = f"https://iss.moex.com/iss/statistics/engines/stock/markets/bonds/bondization/{ID}.json?iss.meta=off"
-
-url = f"https://iss.moex.com/iss/securities.json?q={ticker}&iss.meta=off"
-            
-nkd_url = f"https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQCB/securities/{security_code}.json?iss.meta=off&iss.only=securities&lang=ru"
-
-price_url = f"https://iss.moex.com/iss/history/engines/stock/markets/bonds/boards/TQCB/securities/{security_code}.json?iss.meta=off&iss.json=extended&callback=JSON_CALLBACK&lang=ru&from={date_str}"
-"""
-
 
 class MOEX(Connector):
     def __init__(self, oConnector=None):

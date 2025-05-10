@@ -25,16 +25,6 @@ from advisor.lib.str import str_by_locale
 
 
 class HTMLDoc:
-    """ Класс содержит методы разбора и составления строк для формирования
-        HTML документа
-
-        **Члены класса**
-
-        *lDoc*: Список строк для документа
-
-        *dLinks*: словарь возможных ссылок на сторонние ресурсы
-        """
-
     def __init__(self):
         self.lDoc = []
         self.lLink = []
@@ -112,8 +102,39 @@ class HTMLDoc:
 
         return sHTML
 
-    def set_link(self, sLink):
-        self.lDoc.append(f' {sLink} ')
+    def set_link(self, sName, sQuery):
+        """ Добавляет ссылку на источник
+
+        :param sName: название источника
+        :type sName: str
+        :param sQuery: для ММВБ и Смарт-Лаб - SECID,
+         для новостных агенств - имя компании
+        :type sQuery: str
+        :return: None
+        """
+        sLink = ''
+        if sName == 'ММВБ':
+            sLink = f'https://www.moex.com/ru/issue.aspx?code={sQuery}'
+        if sName == 'Smart-Lab':
+            sLink = f'https://smart-lab.ru/q/bonds/{sQuery}/'
+        if sName == 'Google':
+            sLink = (
+                f'https://www.google.com/search?q={sQuery}'
+                '&num=10&newwindow=1&channel=fs&tbm=nws&sclient=gws-wiz-news')
+        if sName == 'Ведомости':
+            sLink = (
+                f'https://www.vedomosti.ru/search?query={sQuery}&sort=date'
+                '&doc_types=materials,press_releases'
+                '&material_types=news,articles')
+        if sName == 'TACC':
+            sLink = (
+                f'https://tass.ru/search?text={sQuery}'
+                '&rubrics=v-strane,ekonomika,politika,nacionalnye-proekty,'
+                'mezhdunarodnaya-panorama,nedvizhimost,moskva,'
+                'moskovskaya-oblast,spb-news,ural-news,sibir-news,'
+                'arktika-segodnya')
+
+        self.lDoc.append(f'<a href="{sLink}">{sName}</a>, ')
 
     def set_no_data(self):
         self.lDoc.append('!!! Нет данных!!!')
@@ -182,26 +203,14 @@ class InfoBonds(HTMLPage):
         self.oHTML.set_string(sFutureAmort)
 
         self.oHTML.set_title_doc('Страницы облигации', 3)
-        sLink = f'https://www.moex.com/ru/issue.aspx?code={sSECID}'
-        self.oHTML.set_link(f'<a href="{sLink}">ММВБ</a>')
-        sLink = f'https://smart-lab.ru/q/bonds/{sSECID}/'
-        self.oHTML.set_link(f'<a href="{sLink}">Smart-Lab</a>')
+        self.oHTML.set_link('ММВБ', sSECID)
+        self.oHTML.set_link('Smart-Lab', sSECID)
 
         self.oHTML.set_title_doc('Новости об эмитенте', 3)
         sQuery = dBonds['EMITTER'].replace('"', '')
-        sLink = (f'https://www.google.com/search?q={sQuery}'
-                 '&num=10&newwindow=1&channel=fs&tbm=nws&sclient=gws-wiz-news')
-        self.oHTML.set_link(f'<a href="{sLink}">Google</a>')
-        sLink = (f'https://www.vedomosti.ru/search?query={sQuery}&sort=date'
-                 '&doc_types=materials,press_releases'
-                 '&material_types=news,articles')
-        self.oHTML.set_link(f'<a href="{sLink}">Ведомости</a>')
-        sLink = (f'https://tass.ru/search?text={sQuery}'
-                 '&rubrics=v-strane,ekonomika,politika,nacionalnye-proekty,'
-                 'mezhdunarodnaya-panorama,nedvizhimost,moskva,'
-                 'moskovskaya-oblast,spb-news,ural-news,sibir-news,'
-                 'arktika-segodnya')
-        self.oHTML.set_link(f'<a href="{sLink}">TACC</a>')
+        self.oHTML.set_link('Google', sQuery)
+        self.oHTML.set_link('Ведомости', sQuery)
+        self.oHTML.set_link('TACC', sQuery)
 
         self.setText(self.oHTML.get_doc())
 
