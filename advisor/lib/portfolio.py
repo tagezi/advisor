@@ -32,6 +32,7 @@ class Portfolio:
         # суммируем количество по коду инструмента
         oSumByTool = oPortfolio.groupby('tool_code', as_index=False).agg(
             {'tool_count': 'sum'})
+        oSumByTool['tool_count'] = oSumByTool['tool_count'].astype(int)
 
         # находим средневзвешенную цену (PWA - Price Weighted Average)
         oSeriesPWA = weighted_average_pandas(oPortfolio)
