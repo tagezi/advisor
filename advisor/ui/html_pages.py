@@ -19,7 +19,6 @@ import pandas as pd
 from PyQt6.QtWidgets import QTextBrowser
 
 from advisor.lib.bond_analysis import BondAnalysis
-from advisor.lib.constants import BONDFIELDSDICT, BONDFIELDSLIST
 from advisor.lib.math import price_normalization
 from advisor.lib.str import str_by_locale
 
@@ -70,11 +69,11 @@ class HTMLDoc:
         """
         self.lDoc.append(f'{String}<br>')
 
-    def set_dict_to_table(self, dRows, lHeader=None):
+    def set_dict_to_table(self, dRows, dDescription, lHeader=None):
         self.lDoc.append('<table>')
         if lHeader:
             self.set_table_header(lHeader)
-        self.set_dict_to_table_row(dRows)
+        self.set_dict_to_table_row(dRows, dDescription)
         self.lDoc.append('</table>')
 
     def set_table_header(self, lHeader):
@@ -83,11 +82,11 @@ class HTMLDoc:
             self.lDoc.append(f'<th>{sCell}</th>')
         self.lDoc.append('</tr>')
 
-    def set_dict_to_table_row(self, dRows):
+    def set_dict_to_table_row(self, dRows, dDescription):
         for sKey in dRows:
             if dRows[sKey] and dRows[sKey] != '0000-00-00':
                 self.lDoc.append('<tr>')
-                self.lDoc.append(f'<td>{BONDFIELDSDICT[sKey]}: </td>')
+                self.lDoc.append(f'<td>{dDescription[sKey]}: </td>')
                 self.lDoc.append(f'<td> {dRows[sKey]}</td>')
                 self.lDoc.append('</tr>')
 
@@ -159,9 +158,11 @@ class InfoBonds(HTMLPage):
         self._doc(sSECID)
 
     def _doc(self, sSECID):
-        lBond = self.oConnector.get_bond_by_value(sSECID)
+        oAnswer = self.oConnector.get_bond_by_value(sSECID)
+        lBond = oAnswer.fetchone()
+        lNames = list(map(lambda x: x[0], oAnswer.description))
         self.oHTML.set_title_doc(f'Облигация {lBond[1]}')
-        dBonds = dict(zip(BONDFIELDSLIST, lBond))
+        dBonds = dict(zip(lNames, lBond))
         iFaceValue = int
         for sKey in dBonds:
             if sKey == 'FACEVALUE':
@@ -185,7 +186,10 @@ class InfoBonds(HTMLPage):
                     or sKey == 'DURATIONWAPRICE'):
                 dBonds[sKey] = dBonds[sKey].split(',')[0]
 
-        self.oHTML.set_dict_to_table(dBonds)
+        sColumns = 'field_name, field_short_title'
+        lDescription = self.oConnector.sql_get_all('ReferenceTable', sColumns)
+        dDescription = dict(lDescription)
+        self.oHTML.set_dict_to_table(dBonds, dDescription)
 
         self.oHTML.set_title_doc('Будущие купоны', 3)
         oBond = BondAnalysis(self.oConnector, oPD=pd)

@@ -623,14 +623,10 @@ class SQL:
             "MarketDataYields.GSPREADBP, "
             "MarketDataYields.WAPRICE, "
             "MarketDataYields.EFFECTIVEYIELDWAPRICE, "
-            "MarketDataYields.DURATIONWAPRICE, "
-            "MarketDataYields.IR, "
-            "MarketDataYields.ICPI, "
-            "MarketDataYields.BEI, "
-            "MarketDataYields.CBR, "
-            "MarketDataYields.YIELDTOOFFER, "
-            "MarketDataYields.YIELDLASTCOUPON, "
-            "MarketDataYields.ZCYCMOMENT, "
+            "MarketDataYields.DURATIONWAPRICE, MarketDataYields.IR, "
+            "MarketDataYields.ICPI, MarketDataYields.BEI, "
+            "MarketDataYields.CBR, MarketDataYields.YIELDTOOFFER, "
+            "MarketDataYields.YIELDLASTCOUPON, MarketDataYields.ZCYCMOMENT, "
             "MarketDataYields.TRADEMOMENT "
             "FROM BondDescription "
             "JOIN BordSecurities "
@@ -639,7 +635,7 @@ class SQL:
             "ON BondDescription.SECID=MarketDataYields.SECID "
             f"WHERE BondDescription.SECID=?;", (sSECID,))
 
-        return lAnswer.fetchone()
+        return lAnswer
 
 
 if __name__ == '__main__':
