@@ -45,6 +45,7 @@ class Bounds:
     - :class:`float` **fTaxBody**: НДФЛ за разницу в покупке в рублях
     - :class:`float` **fTaxBody**: НДФЛ за купон в рублях
     """
+
     def __init__(self, fBayPrice, fRedemptionPrice=1000.0, fCoupon=0.0,
                  fACI=0.0, iCouponDuration=182, sForeignCurrency='',
                  sCouponDate='', sRedemptionDate='', sOfferDate='',
@@ -123,12 +124,13 @@ class Bounds:
 
     def quantity_of_bonds(self):
         """ Количество покупаемых облигаций """
-        return self.fFounds // (self.fBayPrice + self.fACI + self.fBrokerageFee)
+        return (self.fFounds //
+                (self.fBayPrice + self.fACI + self.fBrokerageFee))
 
     def income(self):
         """ Доход с купленных облигаций """
         k = (self.fRedemptionPrice - self.fBayPrice - self.fTaxBody
-                + self.coupon_without_fee()) * self.quantity_of_bonds()
+             + self.coupon_without_fee()) * self.quantity_of_bonds()
         return k
 
     def profitability(self):
@@ -137,8 +139,8 @@ class Bounds:
 
 
 if __name__ == '__main__':
-    bonds = Bounds(fBayPrice=90.21, fRedemptionPrice=1000.0, fCoupon=38.64, fACI=0.2,
-                   iCouponDuration=182, sForeignCurrency='SUB',
+    bonds = Bounds(fBayPrice=90.21, fRedemptionPrice=1000.0, fCoupon=38.64,
+                   fACI=0.2, iCouponDuration=182, sForeignCurrency='SUB',
                    sCouponDate='2023-10-18', sRedemptionDate='2026-09-16',
                    sOfferDate='2023-10-18', fBrokerageFee=0.00003,
                    fBirgaFee=0.000003, fTax=0.13, fFounds=30000)
@@ -159,4 +161,4 @@ if __name__ == '__main__':
           f'Сумма инвестиции: {bonds.fPurchaseAmount}\n'
           f'Количество облигаций: {bonds.iQuantityOfBonds}\n'
           f'Прибыль: {bonds.income()}\n'
-          f'доходность: {round(bonds.profitability()*100, 2)}\n')
+          f'доходность: {round(bonds.profitability() * 100, 2)}\n')

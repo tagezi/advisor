@@ -189,7 +189,8 @@ class MOEXUpdate(Connector):
                                                      'SECID',
                                                      sSECID[0])
                 if not bSECID:
-                    sURL = f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
+                    sURL = \
+                        f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
                     jJSON = connect(sURL,
                                     only='description',
                                     parameter='description.columns',
@@ -227,7 +228,8 @@ class MOEXUpdate(Connector):
                                                      sSECID[0])
                 i = 0
                 if not bSECID:
-                    sURL = f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
+                    sURL = \
+                        f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
                     jJSON = connect(sURL,
                                     only='description',
                                     parameter='description.columns',

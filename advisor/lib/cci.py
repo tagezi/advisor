@@ -17,23 +17,6 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """ Сложные проценты """
-"""
-https://iss.moex.com//iss/engines/stock/markets/bonds/index.json
-https://iss.moex.com//iss/engines/stock/markets/bonds/securities.json
-https://iss.moex.com//iss/engines/stock/markets/bonds/securities/SU25084RMFS3.json
-
-/iss/statistics/engines/stock/currentprices
-/iss/statistics/engines/stock/markets/bonds/monthendaccints
-/iss/statistics/engines/stock/markets/index/analytics/columns
-# blockname = 'securities'
-# data = [{str.lower(k): r[i] for i, k in enumerate(j[blockname]['columns'])} for
-#         r in j[blockname]['data']]
-#
-# df = pd.json_normalize(data)
-# pd.set_option('display.max_column', 13)
-# df['name'] = df['name'].str.lower()
-# df.to_csv('out2.csv')
-"""
 
 
 class CCI:

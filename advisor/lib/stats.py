@@ -21,7 +21,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Read the data from disk
-data = pd.read_csv('../files/SBER_230101_230730.csv', parse_dates=[['<DATE>', '<TIME>']], index_col='<DATE>_<TIME>')
+data = pd.read_csv('../files/SBER_230101_230730.csv',
+                   parse_dates=[['<DATE>', '<TIME>']],
+                   index_col='<DATE>_<TIME>')
 
 data.rename(columns={'<DATE>_<TIME>': 'datetime',
                      '<OPEN>': 'Open',

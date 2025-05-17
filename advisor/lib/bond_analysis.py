@@ -115,7 +115,10 @@ def bond_analysis(dTableData, oTableData,
     return oTableData
 
 
-def bond_analysis_without(oConnector, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
+def bond_analysis_without(oConnector,
+                          iMinPeriod=30,
+                          iMaxPeriod=181,
+                          fPercent=1):
     # Инфляция
     oInflation = Inflation(oConnector)
     fInflMedian5 = oInflation.inflation_median_for_5()

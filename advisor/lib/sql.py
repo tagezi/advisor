@@ -405,7 +405,7 @@ class SQL:
             the tuple was not successful.
         :rtype: bool
         """
-        if type(lTable) == str:
+        if type(lTable) is not str:
             lTable = [lTable]
 
         for sTable in lTable:

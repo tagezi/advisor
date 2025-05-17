@@ -23,11 +23,16 @@ def bond_yield(dBayPrice, dCouponYield):
     bound = ClassicBonds(dBayPrice, dCouponYield)
     return (f'Цена покупки: {bound.fBayPrice}\n'
             f'Бескупонная доходность: {bound.noncupon_bond_yield()}\n'
-            f'Текущая купонная доходность: {round(bound.current_coupon_yield(), 2)}\n'
-            f'Модифицированная купонная доходность: {round(bound.modified_current_coupon_yield(182), 2)}\n'
-            f'Простая доходность к погашению: {round(bound.redemption_yield(182), 2)}\n'
-            f'Эффективная доходность к погашению: {round(bound.bonds_effective_yield(182), 2)}\n'
-            f'реальная доходность к погашению: {round(bound.real_yield(182), 2)}\n')
+            f'Текущая купонная доходность: '
+            f'{round(bound.current_coupon_yield(), 2)}\n'
+            f'Модифицированная купонная доходность: '
+            f'{round(bound.modified_current_coupon_yield(182), 2)}\n'
+            f'Простая доходность к погашению: '
+            f'{round(bound.redemption_yield(182), 2)}\n'
+            f'Эффективная доходность к погашению: '
+            f'{round(bound.bonds_effective_yield(182), 2)}\n'
+            f'реальная доходность к погашению: '
+            f'{round(bound.real_yield(182), 2)}\n')
 
 
 class ClassicBonds:

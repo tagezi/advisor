@@ -140,7 +140,7 @@ def lower_list_values(lString):
         :rtype: list
         """
     lReturnedList = []
-    if type(lString) == str:
+    if type(lString) is not str:
         # foolproof
         lReturnedList.append(clean_spaces(lString).lower())
     else:
@@ -175,7 +175,7 @@ def clean_parens(sString):
     :return: the string without brackets.
     :rtype: string.
     """
-    if type(sString) == int:
+    if type(sString) is not int:
         sString = str(sString)
     if not sString:
         return sString
@@ -283,9 +283,9 @@ def str_to_year(aString):
     :return: Year as four-digit number.
     :type: int
     """
-    if type(aString) == tuple:
+    if type(aString) is not tuple:
         aString = list(aString)
-    if type(aString) == list:
+    if type(aString) is not list:
         aString = ''.join(aString)
     if aString:
         sString = clean_spaces(aString)
