@@ -16,39 +16,37 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-"""
-The module contains a collection of functions for solving routine tasks with
-strings.
-"""
-import locale
-from os.path import join, normcase
+import unittest
 
-locale.setlocale(locale.LC_ALL, '')
+from advisor.lib.str import *
 
 
-def str_by_locale(aNumber=1000):
-    """
+def suite():
+    oSuite = unittest.TestSuite()
+    oSuite.addTest(TestStr('test_str_str_by_locale'))
+    oSuite.addTest(TestStr('test_str_str_get_file_patch'))
 
-    :param aNumber: число, которое нужно привести к финансовому виду
-    :type aNumber: any
-    :return: строку с числом в финансовом виде
-    :rtype: str
-    """
-    try:
-        return locale._format('%.2f', aNumber, grouping=True, monetary=True)
-    except:
-        return aNumber
+    return oSuite
 
 
-def str_get_file_patch(sDir, sFile):
-    """ Concatenates file path and file name based on OS rules.
+class TestStr(unittest.TestCase):
+    def test_str_str_by_locale(self):
+        """ Check if str_by_locale work correctly. """
+        sTestValue = 1000
+        sLocaleValue = str_by_locale(sTestValue)
+        self.assertEqual(sLocaleValue, '1\u202f000,00')
 
-        :param sDir: String with a patch to a file.
-        :param sFile: String with a filename.
-        :return: Patch to file based on OS rules.
-        """
-    return normcase(join(sDir, sFile))
+        sTestValue = 0.0506
+        sLocaleValue = str_by_locale(sTestValue)
+        self.assertEqual(sLocaleValue, '0,05')
+
+    def test_str_str_get_file_patch(self):
+        sTestDir = '/dir/advisor'
+        sTestFile = 'config.ini'
+        sTaxon = str_get_file_patch(sTestDir, sTestFile)
+        self.assertEqual(sTaxon, '/dir/advisor/config.ini')
 
 
 if __name__ == '__main__':
-    pass
+    runner = unittest.TextTestRunner()
+    runner.run(suite())

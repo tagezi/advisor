@@ -46,7 +46,7 @@ file.
 import sys
 from configparser import ConfigParser, NoSectionError
 
-from advisor.lib.str import str_get_path, str_get_file_patch
+from advisor.lib.str import str_get_file_patch
 
 
 class ConfigProgram(ConfigParser):
