@@ -105,7 +105,7 @@ def get_increase_value(sColumns, tValues):
 
     logging.error('The tuple must be filled or consist of one element.'
                   f'The columns: {sColumns} \n The tuple: {tValues}')
-    return
+    return tValues
 
 
 class SQL:

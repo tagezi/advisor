@@ -45,6 +45,10 @@ def suite():
     oSuite.addTest(TestSQLite('test_sql_sql_get_id'))
     oSuite.addTest(TestSQLite('test_sql_sql_table_clean'))
     oSuite.addTest(TestSQLite('test_sql_export_db'))
+    oSuite.addTest(TestSQLite('test_sql_update'))
+    oSuite.addTest(TestSQLite('test_sql_get_values'))
+    oSuite.addTest(TestSQLite('test_sql_check_value'))
+    oSuite.addTest(TestSQLite('test_sql_get_id'))
 
     return oSuite
 

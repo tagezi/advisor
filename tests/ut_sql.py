@@ -45,6 +45,10 @@ def suite():
     oSuite.addTest(TestSQLite('test_sql_sql_get_id'))
     oSuite.addTest(TestSQLite('test_sql_sql_table_clean'))
     oSuite.addTest(TestSQLite('test_sql_export_db'))
+    oSuite.addTest(TestSQLite('test_sql_update'))
+    oSuite.addTest(TestSQLite('test_sql_get_values'))
+    oSuite.addTest(TestSQLite('test_sql_check_value'))
+    oSuite.addTest(TestSQLite('test_sql_get_id'))
 
     return oSuite
 
@@ -205,6 +209,69 @@ class TestSQLite(TestCase):
 
         iDel = self.oConnector.delete_row('Mistake')
         self.assertFalse(iDel)
+
+    def test_sql_update(self):
+        self.oConnector.insert_row('AccountTypes', 'account_type', ('check',))
+        iUpd = self.oConnector.update('AccountTypes',
+                                      'account_type',
+                                      'account_type_id',
+                                      ('check_too', 5))
+        self.assertTrue(iUpd)
+
+        oCursor = self.oConnector.select('AccountTypes', 'account_type_id',
+                                         'account_type', ('check_too',))
+        lRowsLow = oCursor.fetchall()
+        self.assertEqual(lRowsLow[0][0], 5)
+
+    def test_sql_get_values(self):
+        self.oConnector.insert_row('AccountTypes', 'account_type', ('check',))
+        sValue = self.oConnector.sql_get_values('AccountTypes',
+                                                'account_type_id',
+                                                'account_type',
+                                                ('check',))
+        self.assertEqual(sValue[0][0], 5)
+
+        sValue = self.oConnector.sql_get_values('AccountEvents',
+                                                'acc_events_id',
+                                                'tool_code, tool_price',
+                                                ('SBER', 325.78,),
+                                                'AND')
+        self.assertEqual(sValue[0][0], 5)
+
+    def test_sql_check_value(self):
+        self.oConnector.insert_row('AccountTypes', 'account_type', ('check',))
+        bAnswer = self.oConnector.check_value('AccountTypes',
+                                              'account_type',
+                                              'account_type',
+                                              'check')
+        self.assertTrue(bAnswer)
+
+        bAnswer = self.oConnector.check_value('AccountTypes',
+                                              'account_type',
+                                              'account_type',
+                                              'check1')
+        self.assertFalse(bAnswer)
+
+    def test_sql_get_id(self):
+        self.oConnector.insert_row('AccountTypes', 'account_type', ('check',))
+        iValue = self.oConnector.sql_get_id('AccountTypes',
+                                            'account_type_id',
+                                            'account_type',
+                                            ('check',))
+        self.assertEqual(iValue, 5)
+
+        bAnswer = self.oConnector.sql_get_id('AccountTypes',
+                                             'account_type_id',
+                                             'account_type',
+                                             ('check1',))
+        self.assertFalse(bAnswer)
+
+        iValue = self.oConnector.sql_get_id('AccountEvents',
+                                            'acc_events_id',
+                                            'tool_code, tool_price',
+                                            ('SBER', 325.78,),
+                                            'AND')
+        self.assertEqual(iValue, 5)
 
 
 if __name__ == '__main__':
