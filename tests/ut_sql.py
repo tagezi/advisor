@@ -273,6 +273,16 @@ class TestSQLite(TestCase):
                                             'AND')
         self.assertEqual(iValue, 5)
 
+    def test_check_update(self):
+        oAnswer = self.oConnector.select('BordSecurities', '*',
+                                         'SECID', ('SU26207RMFS9',))
+        oValue = oAnswer.fetchone()
+        sNames = ', '.join(list(map(lambda x: x[0], oAnswer.description)))
+        self.oConnector.check_update('BordSecurities',
+                                     sNames,
+                                     'SECID',
+                                     oValue[1])
+
 
 if __name__ == '__main__':
     runner = unittest.TextTestRunner()

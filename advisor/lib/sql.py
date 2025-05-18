@@ -435,18 +435,18 @@ class SQL:
 
         return False
 
-    def check_update(self, sTable, sColumns, sWhere, lValues):
+    def check_update(self, sTable, sColumns, sWhere, aValues):
         """
 
         :param sTable:
         :param sColumns:
         :param sWhere:
-        :param lValues:
+        :param aValues:
         :return:
         """
-        tQuery = self.sql_get_values(sTable, sColumns, sWhere, (lValues[0],))
+        tQuery = self.sql_get_values(sTable, sColumns, sWhere, (aValues,))
         lQuery = list(tQuery)
-        if lQuery == lValues:
+        if lQuery == aValues:
             return True
 
         return False
