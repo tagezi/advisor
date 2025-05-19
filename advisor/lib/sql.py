@@ -31,6 +31,7 @@ Using:
 """
 
 import logging
+import pandas as pd
 import sqlite3
 from sqlite3 import DatabaseError
 
@@ -451,10 +452,13 @@ class SQL:
 
         return False
 
+    # TODO: UnutTest for one
     def portfolio(self, pd):
         """
 
+        :type pd: pandas
         :return:
+        :rtype: pd.DataFrame
         """
         dfb = pd.read_sql_query(
             "SELECT Tools.tool_type, AccountEvents.tool_code, "
@@ -614,6 +618,57 @@ class SQL:
             f"WHERE BondDescription.SECID=?;", (sSECID,))
 
         return lAnswer
+
+    def get_issuer_info(self, sIssuer):
+        sQuery = (
+            "SELECT id_emitter, Emitter, max(Report_year), Report_date, "
+            "Report_currency, Oil_production, Oil_refining, Gas_production,"
+            "Revenue,"
+            "Operating_profit,"
+            "EBITDA,"
+            "Net_profit,"
+            "Operating_cash_flow,"
+            "CAPEX,"
+            "FCF,"
+            "Dividend_payout,"
+            "Dividend,"
+            "Dividend_income,"
+            "Dividends_profit,"
+            "Oper_expenses,"
+            "Depreciation,"
+            "Personnel_expenses,"
+            "Interest_expenses,"
+            "Assets,"
+            "Net_assets,"
+            "Debt,"
+            "Cash,"
+            "Net_debt,"
+            "JSC_share_price,"
+            "JSC_share_number,"
+            "Capitalization,"
+            "EV,"
+            'Balance_sheet_value,'
+            "EPS,"
+            "FCF_share,"
+            "BV_share, "
+            "EBITDA_return, "
+            "Net_return, "
+            "FCF_yield, "
+            "ROE, "
+            "ROA, "
+            "P_E, "
+            "P_FCF, "
+            "P_S, "
+            "P_BV, "
+            "EV_EBITDA, "
+            "Debt_EBITDA, "
+            "RD_CAPEX, "
+            "CAPEX_Revenue, "
+            "Cost_price "
+            "FROM IssuerReporting "
+            f"WHERE Company={sIssuer};")
+
+        return self.execute_query(sQuery)
 
 
 if __name__ == '__main__':
