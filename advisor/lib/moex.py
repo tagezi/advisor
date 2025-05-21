@@ -165,7 +165,7 @@ class MOEXUpdate(Connector):
             bNotUpdated = self.oConnector.check_update(sTable=sTable,
                                                        sColumns=sColumns,
                                                        sWhere='SECID',
-                                                       lValues=lData[0])
+                                                       aValues=lData[0])
             if not bNotUpdated:
                 lData.append(lData[0])
                 lData.pop(0)
