@@ -519,7 +519,7 @@ class SQL:
             # "AND BordSecurities.OFFERDATE is NULL "
             "AND BordSecurities.COUPONPERCENT>1 "
             f"AND BordSecurities.COUPONPERCENT>={fPercent} "
-            "AND BordSecurities.MATDATE>\"2025-09-01\" "
+            "AND BordSecurities.MATDATE>DATE('now') "
             "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
             f"AND BordSecurities.COUPONPERIOD>={int(iMinPeriod)} "
             f"AND BordSecurities.COUPONPERIOD<={int(iMaxPeriod)} "
