@@ -204,6 +204,22 @@ class SQL:
 
         return oCursor
 
+    def table_info(self, sTable):
+        """ Returns information about columns in a table (cid, name, type,
+         notnull, dflt_value, pk)
+
+        :param sTable: The table name for which information needs to be returned
+        :type sTable: str
+        :return: information about columns
+        :rtype: list
+        """
+        sSQL = f'PRAGMA table_info({sTable});'
+        oCursor = self.execute_query(sSQL)
+
+        if oCursor:
+            return oCursor.fetchall()
+        return None
+
     def insert_row(self, sTable, sColumns, tValues):
         """ Inserts a record in the database table.
 
