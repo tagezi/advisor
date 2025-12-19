@@ -274,11 +274,11 @@ class TestSQLite(TestCase):
         self.assertEqual(iValue, 5)
 
     def test_check_update(self):
-        oAnswer = self.oConnector.select('BordSecurities', '*',
+        oAnswer = self.oConnector.select('BondsSecurities', '*',
                                          'SECID', ('SU26207RMFS9',))
         oValue = oAnswer.fetchone()
         sNames = ', '.join(list(map(lambda x: x[0], oAnswer.description)))
-        self.oConnector.check_update('BordSecurities',
+        self.oConnector.check_update('BondsSecurities',
                                      sNames,
                                      'SECID',
                                      oValue[1])

@@ -123,15 +123,15 @@ class MOEXUpdate(Connector):
                 'iss/engines/stock/markets/bonds/securities.json')
         jJSON = connect(sURL)
 
-        # Bord Securities
+        # Bond Securities
         self.update_data(jJSON=jJSON,
                          sField='securities',
-                         sTable='BordSecurities')
+                         sTable='BondsSecurities')
 
         # Market Data Yields
         self.update_data(jJSON=jJSON,
                          sField='marketdata_yields',
-                         sTable='MarketDataYields')
+                         sTable='BondsMarketData')
 
     def get_markets_shares(self):
         """ Получает таблицу инструментов торговой сессии по рынку акций
@@ -177,7 +177,7 @@ class MOEXUpdate(Connector):
     def get_bond_description(self, sSECID=''):
         if not sSECID:
             lSECIDList = (
-                self.oConnector.sql_get_values('BordSecurities',
+                self.oConnector.sql_get_values('BondsSecurities',
                                                'SECID',
                                                'MATDATE>',
                                                (today().strftime("%Y-%m-%d"),))
