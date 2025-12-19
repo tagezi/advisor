@@ -462,7 +462,9 @@ class SQL:
         :return:
         """
         tQuery = self.sql_get_values(sTable, sColumns, sWhere, (aValues,))
-        lQuery = list(tQuery)
+        lQuery = []
+        if tQuery:
+            lQuery = list(tQuery)
         if lQuery == aValues:
             return True
 
