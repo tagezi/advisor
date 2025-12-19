@@ -512,7 +512,7 @@ class SQL:
                            bIN=False,
                            iMinPeriod=30,
                            iMaxPeriod=182,
-                           fMinCouponValue=16.00,
+                           fMinCouponValue=0,
                            fPercent=1.0
                            ):
         sQuery = (
