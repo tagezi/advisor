@@ -243,7 +243,7 @@ def weighted_average_pandas(dataframe):
         wt = df['tool_count']
         oSeries = pd.concat([oSeries, pd.Series(
             ((val * wt).sum() / wt.sum())
-        )])
+        )], ignore_index=True)
 
     return oSeries
 
