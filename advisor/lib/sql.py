@@ -637,6 +637,9 @@ class SQL:
 
         return lAnswer
 
+    def get_issuer_list(self):
+        return self.execute_query('SELECT NAME FROM ShareDescriptions;')
+
     def get_issuer_info(self, sIssuer):
         sQuery = (
             "SELECT id_emitter, Emitter, max(Report_year), Report_date, "
