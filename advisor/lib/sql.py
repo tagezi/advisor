@@ -532,7 +532,7 @@ class SQL:
             "ON BondsMarketData.SECID=BondsSecurities.SECID "
             f"WHERE BondDescription.INITIALFACEVALUE <= {iInitialFaceValue} "
             f"AND BondDescription.FACEUNIT = \"{sFaceUnit}\" "
-            "AND BondsSecurities.ISQUALIFIEDINVESTORS=0 "
+            "AND BondDescription.ISQUALIFIEDINVESTORS=0 "
             "AND BondsSecurities.PREVPRICE is not NULL "
             # "AND BondsSecurities.OFFERDATE is NULL "
             "AND BondsSecurities.COUPONPERCENT>1 "
