@@ -502,70 +502,54 @@ class SQL:
 
         return pd.concat([dfb, dfs], axis=0, join='outer', ignore_index=True)
 
-    def get_bonds_by_value(self,
-                           pd,
-                           iInitialFaceValue=1000,
-                           sFaceUnit='SUR',
-                           fMinYield=10,
-                           fMaxYield=30,
-                           bOFZ=False,
-                           bIN=False,
-                           iMinPeriod=30,
-                           iMaxPeriod=182,
-                           fMinCouponValue=0,
-                           fPercent=1.0
-                           ):
+    def get_bonds_by_value(self, pd, iInitialFaceValue=1000, sFaceUnit='SUR',
+                           fMinYield=10, fMaxYield=30, bOFZ=False, iMinPeriod=30,
+                           iMaxPeriod=182, fMinCouponValue=0, fPercent=1.0 ):
+        """ Выборка облигаций из Представления в базе данных.
+
+        :param pd: Объект Pandas
+        :type pd: pd
+        :param iInitialFaceValue: Номинальная стоимость одной ценной бумаги
+        :param sFaceUnit: Валюта номинала
+        :param fMinYield: Минимальная доходность
+        :param fMaxYield: Максимальная доходность
+        :param bOFZ: Отбирать ли только ОФЗ
+        :param iMinPeriod: Минимальный период купона
+        :param iMaxPeriod: Максимальный период купона
+        :param fMinCouponValue: Минимальное значение купона
+        :param fPercent: Минимальное значение купона в процентах
+        :return: Возвращает таблицу значений по запросу в формате DataFrame Pandas
+        :rtype: pd.DataFame
+        """
         sQuery = (
-            "SELECT BondsSecurities.SECID, BondsSecurities.ISIN, "
-            "BondsSecurities.SHORTNAME, BondsSecurities.MATDATE, "
-            "BondsSecurities.PREVPRICE, BondsSecurities.YIELDATPREVWAPRICE, "
-            "BondsMarketData.EFFECTIVEYIELD, "
-            "BondsSecurities.COUPONPERCENT, BondsSecurities.COUPONVALUE, "
-            "BondsSecurities.ACCRUEDINT, BondsSecurities.NEXTCOUPON, "
-            "BondsSecurities.COUPONPERIOD, BondDescription.INITIALFACEVALUE, "
-            "BondDescription.FACEVALUE, BondDescription.FACEUNIT, "
-            "BondsSecurities.LISTLEVEL, BondDescription.EMITTER "
-            "FROM BondsSecurities "
-            "JOIN BondDescription "
-            "ON BondDescription.SECID=BondsSecurities.SECID "
-            "JOIN BondsMarketData "
-            "ON BondsMarketData.SECID=BondsSecurities.SECID "
-            f"WHERE BondDescription.INITIALFACEVALUE <= {iInitialFaceValue} "
-            f"AND BondDescription.FACEUNIT = \"{sFaceUnit}\" "
-            "AND BondDescription.ISQUALIFIEDINVESTORS=0 "
-            "AND BondsSecurities.PREVPRICE is not NULL "
-            # "AND BondsSecurities.OFFERDATE is NULL "
-            "AND BondsSecurities.COUPONPERCENT>1 "
-            f"AND BondsSecurities.COUPONPERCENT>={fPercent} "
-            "AND BondsSecurities.MATDATE>DATE('now') "
-            "AND BondDescription.INITIALFACEVALUE=BondDescription.FACEVALUE "
-            f"AND BondsSecurities.COUPONPERIOD>={int(iMinPeriod)} "
-            f"AND BondsSecurities.COUPONPERIOD<={int(iMaxPeriod)} "
-            f"AND BondsSecurities.COUPONVALUE>={fMinCouponValue} "
+            "SELECT BondView.SECID, BondView.ISIN, "
+            "BondView.SHORTNAME, BondView.MATDATE, "
+            "BondView.PREVPRICE, BondView.YIELDATPREVWAPRICE, "
+            "BondView.EFFECTIVEYIELD, "
+            "BondView.COUPONPERCENT, BondView.COUPONVALUE, "
+            "BondView.ACCRUEDINT, BondView.NEXTCOUPON, "
+            "BondView.COUPONPERIOD, BondView.INITIALFACEVALUE, "
+            "BondView.FACEVALUE, BondView.FACEUNIT, "
+            "BondView.LISTLEVEL, BondView.EMITTER "
+            "FROM BondView "
+            f"WHERE BondView.INITIALFACEVALUE<={iInitialFaceValue} "
+            f"AND BondView.FACEUNIT=\"{sFaceUnit}\" "
+            f"AND BondView.COUPONPERCENT>={fPercent} "
+            f"AND BondView.COUPONPERIOD>={int(iMinPeriod)} "
+            f"AND BondView.COUPONPERIOD<={int(iMaxPeriod)} "
+            f"AND BondView.COUPONVALUE>={fMinCouponValue} "
         )
 
         if bOFZ:
-            sQuery = f" {sQuery} AND BondsSecurities.SECNAME like \"%ОФЗ%\" "
+            sQuery = f" {sQuery} AND BondView.SHORTNAME like \"%ОФЗ%\" "
         else:
             sQuery = (
-                f" {sQuery} AND BondsSecurities.YIELDATPREVWAPRICE>{fMinYield} "
-                f"AND BondsSecurities.YIELDATPREVWAPRICE<{fMaxYield} "
-                f"AND BondsSecurities.SECNAME not like \"%ОФЗ%\" "
-                "AND BondDescription.EMITTER not like \"%икрофинансовая%\" "
-                "AND BondDescription.EMITTER not like \"%коллектор%\" "
-                "AND BondDescription.EMITTER not like \"ООО %\" "
+                f" {sQuery} AND BondView.YIELDATPREVWAPRICE>{fMinYield} "
+                f"AND BondView.YIELDATPREVWAPRICE<{fMaxYield} "
+                f"AND BondView.MATDATE>\"2028-01-01\""
             )
 
-        sQuery = (f"{sQuery} AND BondsSecurities.SECNAME not like \"%ОФЗ-АД%\" "
-                  "AND BondsSecurities.SECNAME not like \"%ОФЗ-ПК%\" ")
-
-        if bIN:
-            sQuery = f" {sQuery} AND BondsSecurities.SECNAME like \"%ОФЗ-ИН%\" "
-        else:
-            sQuery = (f" {sQuery} AND BondsSecurities.SECNAME not like "
-                      f"\"%ОФЗ-ИН%\" ")
-
-        sQuery = f" {sQuery} GROUP BY BondsSecurities.MATDATE;"
+        sQuery = f" {sQuery} GROUP BY BondView.MATDATE;"
 
         return pd.read_sql_query(sQuery, self.oConnector)
 

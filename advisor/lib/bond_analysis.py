@@ -207,9 +207,9 @@ class BondAnalysis:
                            iMinPeriod=30,
                            iMaxPeriod=182,
                            fPercent=1):
-        oQuery = self.oConnector.get_bonds_by_value(self.oPD,
-                                                    iInitialFaceValue,
-                                                    sFaceUnit,
+        oQuery = self.oConnector.get_bonds_by_value(pd=self.oPD,
+                                                    iInitialFaceValue=iInitialFaceValue,
+                                                    sFaceUnit=sFaceUnit,
                                                     bOFZ=bOFZ,
                                                     iMinPeriod=iMinPeriod,
                                                     iMaxPeriod=iMaxPeriod,
