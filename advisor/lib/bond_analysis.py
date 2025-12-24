@@ -44,14 +44,70 @@ def get_data(oTableData, sSECID):
 
     return fPrice, fACC, sMatDate
 
-
+#TODO: Сделать возможность выбора показа значений доходности с учетом инфляции,
+# налогов и комиссий брокера и биржи
 def bond_analysis(dTableData, oTableData,
-                  fInflMedian5, fInflMedian10,
+                  bInfl, fInflMedian5, fInflMedian10,
                   iMinPeriod=30, iMaxPeriod=181):
     """
 
-    :param iMaxPeriod:
+    :param dTableData:
+    :param oTableData:
+    :param bInfl:
+    :param fInflMedian5:
+    :param fInflMedian10:
     :param iMinPeriod:
+    :param iMaxPeriod:
+    :return:
+    """
+    lIAPPY5Tax, lIAPPY10Tax = [], []
+    for sSECID in oTableData['SECID']:
+        bAmort = dTableData.get_check_amort(sSECID=sSECID)
+        if bAmort:
+            oTableData.drop(
+                oTableData[
+                    oTableData['SECID'] == sSECID].index, inplace=True
+            )
+            continue
+
+        if bInfl:
+            lIAPPY5Tax, lIAPPY10Tax = acc_inflation_bond(dTableData,
+                                                         oTableData,
+                                                         sSECID,
+                                                         fInflMedian5,
+                                                         fInflMedian10)
+
+    if bInfl:
+        # формируем новую таблицу
+        oTableData.insert(7, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
+        oTableData.insert(8, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
+        oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
+
+        oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
+                              'Доходность, %', 'Эффективная, %',
+                              '% в год при сред. инфл. за 5л)',
+                              '% в год при сред. инфл за 10л)',
+                              'Процент купона', 'Значение купона, руб', 'НКД',
+                              'Следующий купон', 'Период купона',
+                              'Начальный номинал', 'Текущий номинал',
+                              'Уровень листинга', 'Эмитент']
+        oTableData = oTableData[
+            oTableData['% в год при сред. инфл. за 5л)'] > 0]
+    else:
+        oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
+        oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
+                              'Доходность, %', 'Эффективная, %',
+                              'Процент купона', 'Значение купона, руб', 'НКД',
+                              'Следующий купон', 'Период купона',
+                              'Начальный номинал', 'Текущий номинал',
+                              'Уровень листинга', 'Эмитент']
+
+    return oTableData
+
+
+def acc_inflation_bond(dTableData, oTableData, sSECID, fInflMedian5, fInflMedian10):
+    """
+
     :param dTableData:
     :param oTableData:
     :type oTableData: pd.DataFrame
@@ -64,91 +120,80 @@ def bond_analysis(dTableData, oTableData,
     """
     # IAPPY - Inflation-adjusted profit as a percentage in year
     lIAPPY5Tax, lIAPPY10Tax = [], []
-    for sSECID in oTableData['SECID']:
-        bAmort = dTableData.get_check_amort(sSECID=sSECID)
-        if bAmort:
-            oTableData.drop(
-                oTableData[
-                    oTableData['SECID'] == sSECID].index, inplace=True
-            )
-            continue
+    fPrice, fACC, sMatDate = get_data(oTableData, sSECID)
+    oUpCoupons = dTableData.get_future(sSECID=sSECID, sWhat='coupons')
 
-        fPrice, fACC, sMatDate = get_data(oTableData, sSECID)
-        oUpCoupons = dTableData.get_future(sSECID=sSECID, sWhat='coupons')
-        # высчитываем значения и купоны с учетом инфляции
-        fFaceValue5 = face_value_inflation(fInflMedian5, oUpCoupons)
-        lInflUpCoupons5 = by_inflation(fInflMedian5, oUpCoupons)
-        fFaceValue10 = face_value_inflation(fInflMedian10, oUpCoupons)
-        lInflUpCoupons10 = by_inflation(fInflMedian10, oUpCoupons)
-        # находим сумму купонов
-        fInfSumValue5 = sum(lInflUpCoupons5)
-        fInfSumValue10 = sum(lInflUpCoupons10)
-        # высчитываем прибыль с учетом комиссий и налога
-        fProfitInfl5Tax = ofz_bond_profit(fInfSumValue5, fACC, fFaceValue5,
-                                          fPrice, sDate=sMatDate,
-                                          bTax=True)
-        fProfitInfl10Tax = ofz_bond_profit(fInfSumValue10, fACC,
-                                           fFaceValue10, fPrice,
-                                           sDate=sMatDate, bTax=True)
-        # Считаем доход в процентах
-        fIAPP5Tax = ofz_bond_profit_percent(fProfitInfl5Tax, fPrice)
-        fIAPP10Tax = ofz_bond_profit_percent(fProfitInfl10Tax, fPrice)
-        # считаем доход в процентах в год
-        lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
-        lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
-    # формируем новую таблицу
-    oTableData.insert(7, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
-    oTableData.insert(8, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
-    oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
+    # высчитываем значения и купоны с учетом инфляции
+    fFaceValue5 = face_value_inflation(fInflMedian5, oUpCoupons)
+    lInflUpCoupons5 = by_inflation(fInflMedian5, oUpCoupons)
+    fFaceValue10 = face_value_inflation(fInflMedian10, oUpCoupons)
+    lInflUpCoupons10 = by_inflation(fInflMedian10, oUpCoupons)
+    # находим сумму купонов
+    fInfSumValue5 = sum(lInflUpCoupons5)
+    fInfSumValue10 = sum(lInflUpCoupons10)
+    # высчитываем прибыль с учетом комиссий и налога
+    fProfitInfl5Tax = ofz_bond_profit(fInfSumValue5, fACC, fFaceValue5,
+                                      fPrice, sDate=sMatDate,
+                                      bTax=True)
+    fProfitInfl10Tax = ofz_bond_profit(fInfSumValue10, fACC,
+                                       fFaceValue10, fPrice,
+                                       sDate=sMatDate, bTax=True)
+    # Считаем доход в процентах
+    fIAPP5Tax = ofz_bond_profit_percent(fProfitInfl5Tax, fPrice)
+    fIAPP10Tax = ofz_bond_profit_percent(fProfitInfl10Tax, fPrice)
+    # считаем доход в процентах в год
+    lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
+    lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
 
-    oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
-                          'Доходность, %', 'Эффективная, %',
-                          '% в год при сред. инфл. за 5л)',
-                          '% в год при сред. инфл за 10л)',
-                          'Процент купона', 'Значение купона, руб', 'НКД',
-                          'Следующий купон', 'Период купона',
-                          'Начальный номинал', 'Текущий номинал',
-                          'Уровень листинга', 'Эмитент']
-    oTableData = oTableData[
-        oTableData['% в год при сред. инфл. за 5л)'] > 0]
 
-    return oTableData
+    return lIAPPY5Tax, lIAPPY10Tax
 
 
 def bond_analysis_without(oConnector,
                           iMinPeriod=30,
                           iMaxPeriod=181,
-                          fPercent=1):
+                          fPercent=1,
+                          bInfl=False):
     # Инфляция
-    oInflation = Inflation(oConnector)
-    fInflMedian5 = oInflation.inflation_median_for_5()
-    fInflMedian10 = oInflation.inflation_average_for_10()
+    fInflMedian5 = 0
+    fInflMedian10 = 0
+    if bInfl:
+        oInflation = Inflation(oConnector)
+        fInflMedian5 = oInflation.inflation_median_for_5()
+        fInflMedian10 = oInflation.inflation_average_for_10()
+
     # Отбираем список облигаций
     dTableData = BondAnalysis(oConnector)
     oTableData = dTableData.get_bond_by_values(iMinPeriod=iMinPeriod,
                                                iMaxPeriod=iMaxPeriod,
                                                fPercent=fPercent)
-    oTableData = bond_analysis(dTableData,
-                               oTableData,
-                               fInflMedian5,
-                               fInflMedian10)
+    oTableData = bond_analysis(dTableData=dTableData,
+                               oTableData=oTableData,
+                               bInfl=bInfl,
+                               fInflMedian5=fInflMedian5,
+                               fInflMedian10=fInflMedian10)
 
     return oTableData.dropna()
 
 
-def bond_analysis_ofz(oConnector):
+def bond_analysis_ofz(oConnector, bInfl=False):
     # Инфляция
-    oInflation = Inflation(oConnector)
-    fInflMedian5 = oInflation.inflation_median_for_5()
-    fInflMedian10 = oInflation.inflation_average_for_10()
+    fInflMedian5 = 0
+    fInflMedian10 = 0
+    if bInfl:
+        oInflation = Inflation(oConnector)
+        fInflMedian5 = oInflation.inflation_median_for_5()
+        fInflMedian10 = oInflation.inflation_average_for_10()
+
     # Отбираем список облигаций
     dTableData = BondAnalysis(oConnector)
     oTableData = dTableData.get_bond_by_values(bOFZ=True)
 
-    oTableData = bond_analysis(dTableData,
-                               oTableData,
-                               fInflMedian5,
-                               fInflMedian10)
+    oTableData = bond_analysis(dTableData=dTableData,
+                               oTableData=oTableData,
+                               bInfl=bInfl,
+                               fInflMedian5=fInflMedian5,
+                               fInflMedian10=fInflMedian10)
 
     return oTableData
 
