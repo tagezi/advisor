@@ -470,7 +470,7 @@ class SQL:
 
         return False
 
-    # TODO: UnutTest for one
+    # TODO: UnitTest for one
     def portfolio(self, pd):
         """
 
@@ -518,7 +518,7 @@ class SQL:
         :param iMaxPeriod: Максимальный период купона
         :param fMinCouponValue: Минимальное значение купона
         :param fPercent: Минимальное значение купона в процентах
-        :return: Возвращает таблицу значений по запросу в формате DataFrame Pandas
+        :return: Возвращает таблицу значений по запросу в формате DataFrame
         :rtype: pd.DataFame
         """
         sQuery = (
@@ -546,7 +546,7 @@ class SQL:
             sQuery = (
                 f" {sQuery} AND BondView.YIELDATPREVWAPRICE>{fMinYield} "
                 f"AND BondView.YIELDATPREVWAPRICE<{fMaxYield} "
-                f"AND BondView.MATDATE>\"2028-01-01\""
+                f"AND BondView.MATDATE>\"2028-01-01\" "
             )
 
         sQuery = f" {sQuery} GROUP BY BondView.MATDATE;"
