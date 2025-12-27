@@ -28,6 +28,15 @@ from advisor.lib.constants import FILE_DB
 
 
 def get_data(oTableData, sSECID):
+    """ Возвращает цену облигации в валюте номинала, ндк и дату погашения
+
+    :param oTableData: Таблица облигаций в формате DataFrame Pandas
+    :type oTableData: pd.DataFrame
+    :param sSECID: SECID ценной бумаги на мосбирже
+    :type sSECID: str
+    :return: Цена облигации, НДК, дата погашения облигации
+    :rtype: list[float, float, str]
+    """
     # Выбираем строку и подготавливаем её
     oRowData = oTableData.loc[oTableData['SECID'] == sSECID]
     oRowData = oRowData.set_index('SECID')
@@ -46,21 +55,24 @@ def get_data(oTableData, sSECID):
 
 #TODO: Сделать возможность выбора показа значений доходности с учетом инфляции,
 # налогов и комиссий брокера и биржи
-def bond_analysis(dTableData, oTableData,
-                  bInfl, fInflMedian5, fInflMedian10,
-                  iMinPeriod=30, iMaxPeriod=181):
-    """
+def bond_analysis(dTableData, oTableData, bInfl, fInflMedian5, fInflMedian10):
+    """ Удаляет бумаги с амортизацией и формирует таблицу для показа на вкладке
 
     :param dTableData:
-    :param oTableData:
-    :param bInfl:
-    :param fInflMedian5:
-    :param fInflMedian10:
-    :param iMinPeriod:
-    :param iMaxPeriod:
-    :return:
+    :param oTableData: Таблица облигаций в формате DataFrame Pandas
+    :type oTableData: pd.DataFrame
+    :param bInfl: Показывать ли доходность облигаций с учетом инфляции и др.
+    :type bInfl: bool
+    :param fInflMedian5: Медиана инфляции за 5 лет
+    :type fInflMedian5: float
+    :param fInflMedian10: Медиана инфляции за 10 лет
+    :type fInflMedian10: float
+    :return: Возвращает таблицу облигаций в формате DataFrame Pandas
+    :rtype: pd.DataFrame
     """
+    # IAPPY - Inflation-adjusted profit as a percentage in year
     lIAPPY5Tax, lIAPPY10Tax = [], []
+    # Просматриваем все список и убираем из него бумаги с амортизацией
     for sSECID in oTableData['SECID']:
         bAmort = dTableData.get_check_amort(sSECID=sSECID)
         if bAmort:
@@ -71,14 +83,17 @@ def bond_analysis(dTableData, oTableData,
             continue
 
         if bInfl:
-            lIAPPY5Tax, lIAPPY10Tax = acc_inflation_bond(dTableData,
-                                                         oTableData,
-                                                         sSECID,
-                                                         fInflMedian5,
-                                                         fInflMedian10)
+            fIAPP5Tax, fIAPP10Tax, sMatDate = acc_inflation_bond(dTableData,
+                                                                 oTableData,
+                                                                 sSECID,
+                                                                 fInflMedian5,
+                                                                 fInflMedian10)
+            # считаем доход в процентах в год
+            lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
+            lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
 
+    # формируем новую таблицу с учетом показа значений с инфляцией и тд.
     if bInfl:
-        # формируем новую таблицу
         oTableData.insert(7, 'Процент (инфл 5) в год, %', lIAPPY5Tax)
         oTableData.insert(8, 'Процент (инфл 10) в год, %', lIAPPY10Tax)
         oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
@@ -91,6 +106,8 @@ def bond_analysis(dTableData, oTableData,
                               'Следующий купон', 'Период купона',
                               'Начальный номинал', 'Текущий номинал',
                               'Уровень листинга', 'Эмитент']
+        # оставляем только те бумаги, которые с учетом инфляции на момент
+        # погашения имеют положительную доходность
         oTableData = oTableData[
             oTableData['% в год при сред. инфл. за 5л)'] > 0]
     else:
@@ -105,21 +122,22 @@ def bond_analysis(dTableData, oTableData,
     return oTableData
 
 
-def acc_inflation_bond(dTableData, oTableData, sSECID, fInflMedian5, fInflMedian10):
-    """
+def acc_inflation_bond(dTableData, oTableData, sSECID,
+                       fInflMedian5, fInflMedian10):
+    """ Рассчитывает доходность облигаций с учетом инфляции за 5 и 10 лет
 
     :param dTableData:
-    :param oTableData:
+    :param oTableData: Таблица ценных бумаг в формате dataFrame Pandas
     :type oTableData: pd.DataFrame
+    :param sSECID: SECID ценной бумаги на мосбирже
+    :type sSECID: str
     :param fInflMedian5: медианная инфляция за 5 лет
     :type fInflMedian5: float
     :param fInflMedian10: медианная инфляция за 10 лет
     :type fInflMedian10: float
-    :return:
-    :rtype: pd.DataFrame
+    :return: Доходность за 5 и 10 лет с учетом инфляции, налога и сборов
+    :rtype: list[float, float, str]
     """
-    # IAPPY - Inflation-adjusted profit as a percentage in year
-    lIAPPY5Tax, lIAPPY10Tax = [], []
     fPrice, fACC, sMatDate = get_data(oTableData, sSECID)
     oUpCoupons = dTableData.get_future(sSECID=sSECID, sWhat='coupons')
 
@@ -141,20 +159,29 @@ def acc_inflation_bond(dTableData, oTableData, sSECID, fInflMedian5, fInflMedian
     # Считаем доход в процентах
     fIAPP5Tax = ofz_bond_profit_percent(fProfitInfl5Tax, fPrice)
     fIAPP10Tax = ofz_bond_profit_percent(fProfitInfl10Tax, fPrice)
-    # считаем доход в процентах в год
-    lIAPPY5Tax.append(percent_year(fIAPP5Tax, sMatDate))
-    lIAPPY10Tax.append(percent_year(fIAPP10Tax, sMatDate))
 
-
-    return lIAPPY5Tax, lIAPPY10Tax
+    return fIAPP5Tax, fIAPP10Tax, sMatDate
 
 
 def bond_analysis_without(oConnector,
                           iMinPeriod=30,
                           iMaxPeriod=181,
                           fPercent=1,
-                          bInfl=False):
-    # Инфляция
+                          bInfl=True):
+    """
+
+    :param oConnector: Доступ к базе данных и API класса SQL
+    :type oConnector: advisor.lib.sql.SQL
+    :param iMinPeriod: Минимальный период купона
+    :type iMinPeriod: int
+    :param iMaxPeriod: Максимальный период купона
+    :type iMaxPeriod: int
+    :param fPercent:
+    :param bInfl: Показывать ли доходность облигаций с учетом инфляции и др.
+    :type bInfl: bool
+    :return:
+    """
+    # Инфляция за 5 и 10 лет соответственно
     fInflMedian5 = 0
     fInflMedian10 = 0
     if bInfl:
@@ -177,7 +204,15 @@ def bond_analysis_without(oConnector,
 
 
 def bond_analysis_ofz(oConnector, bInfl=False):
-    # Инфляция
+    """
+
+    :param oConnector: Доступ к базе данных и API класса SQL
+    :type oConnector: advisor.lib.sql.SQL
+    :param bInfl: Показывать ли доходность облигаций с учетом инфляции и др.
+    :type bInfl bool
+    :return:
+    """
+    # Инфляция за 5 и 10 лет соответственно
     fInflMedian5 = 0
     fInflMedian10 = 0
     if bInfl:
@@ -200,6 +235,12 @@ def bond_analysis_ofz(oConnector, bInfl=False):
 
 class BondAnalysis:
     def __init__(self, oConnector, oPD=pd):
+        """
+
+        :param oConnector: Доступ к базе данных и API класса SQL
+        :type oConnector: advisor.lib.sql.SQL
+        :param oPD:
+        """
         self.oConnector = oConnector
         self.oPD = oPD
         self.oQuery = MOEX(self.oConnector)
@@ -208,8 +249,9 @@ class BondAnalysis:
     def check_is_in_db(self, sSECID, sProperty):
         """
 
+        :param sSECID: SECID ценной бумаги на мосбирже
+        :type sSECID: str
         :param sProperty:
-        :param sSECID:
         :return:
         """
         tValues = (sSECID,)
@@ -263,13 +305,19 @@ class BondAnalysis:
         return oQuery
 
     def get_bond_info(self, sSECID):
+        """
+
+        :param sSECID: SECID ценной бумаги на мосбирже
+        :type sSECID: str
+        :return:
+        """
         return self.oQuery.get_bound_info(sSECID)
 
     def get_check_amort(self, sSECID, bExcludeAmor=True):
         """
 
         :param bExcludeAmor:
-        :param sSECID:
+        :param sSECID: SECID ценной бумаги на мосбирже
         :type sSECID: str
         :return:DataFrame
         """
@@ -284,9 +332,11 @@ class BondAnalysis:
     def get_future(self, sSECID, sWhat='coupons'):
         """
 
-        :param sSECID:
+        :param sSECID: SECID ценной бумаги на мосбирже
         :type sSECID: str
-        :return:DataFrame
+        :param sWhat:
+        :type sWhat: str
+        :return: pd.DataFrame
         """
         if sWhat == 'coupons':
             sProperty = 'coupons'
