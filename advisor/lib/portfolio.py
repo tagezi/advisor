@@ -28,6 +28,11 @@ class Portfolio:
     def portfolio_data(self):
         # все преобразования проходят в DataFrame Pandas, если не указано иное
         oPortfolio = self.oConnector.portfolio(pd)
+
+        # удаляем проданные бумаги
+        oPortfolio.loc[oPortfolio['event_id'] == 5, 'tool_count'] =\
+            oPortfolio.loc[oPortfolio['event_id'] == 5, 'tool_count'] * -1
+
         oPortfolio = oPortfolio.sort_values(['tool_type', 'tool_code'])
         # суммируем количество по коду инструмента
         oSumByTool = oPortfolio.groupby('tool_code', as_index=False).agg(
