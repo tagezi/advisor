@@ -179,7 +179,8 @@ def bond_analysis_without(oConnector,
     :param fPercent:
     :param bInfl: Показывать ли доходность облигаций с учетом инфляции и др.
     :type bInfl: bool
-    :return:
+    :return: Возвращает таблицу облигаций в формате DataFrame Pandas
+    :rtype: pd.DataFrame
     """
     # Инфляция за 5 и 10 лет соответственно
     fInflMedian5 = 0
@@ -210,7 +211,8 @@ def bond_analysis_ofz(oConnector, bInfl=False):
     :type oConnector: advisor.lib.sql.SQL
     :param bInfl: Показывать ли доходность облигаций с учетом инфляции и др.
     :type bInfl bool
-    :return:
+    :return: Возвращает таблицу облигаций в формате DataFrame Pandas
+    :rtype: pd.DataFrame
     """
     # Инфляция за 5 и 10 лет соответственно
     fInflMedian5 = 0
@@ -313,13 +315,16 @@ class BondAnalysis:
         """
         return self.oQuery.get_bound_info(sSECID)
 
-    def get_check_amort(self, sSECID, bExcludeAmor=True):
-        """
+    def get_check_amort(self, sSECID):
+        """ Проверяет амортизацию облигации в базе данных. Если амортизация
+        больше 1, то облигация с амортизацией. При амортизации равной 1
+        амортизация осуществляется при погашении облигации.
 
-        :param bExcludeAmor:
         :param sSECID: SECID ценной бумаги на мосбирже
         :type sSECID: str
-        :return:DataFrame
+        :return: Возвращает значение Истина или Ложь в зависимости от
+         амортизации облигации
+        :rtype: bool
         """
         oAmort = self.check_is_in_db(sSECID, 'amort')
 
