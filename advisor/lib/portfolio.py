@@ -61,7 +61,7 @@ class Portfolio:
         oPortfolio.columns = ['Тип актива', 'Код актива', 'Имя актива',
                               'Средняя цена покупки', 'Количество', 'Сумма']
 
-        return oPortfolio
+        return oPortfolio.dropna()
 
 
 if __name__ == '__main__':
