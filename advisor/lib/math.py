@@ -241,9 +241,20 @@ def weighted_average_pandas(dataframe):
         df = dataframe.loc[dataframe['tool_code'] == x]
         val = df['tool_price']
         wt = df['tool_count']
-        oSeries = pd.concat([oSeries, pd.Series(
-            ((val * wt).sum() / wt.sum())
-        )], ignore_index=True)
+        if not oSeries.empty:
+            if wt.sum() != 0:
+                oSeries = pd.concat([oSeries, pd.Series(
+                    ((val * wt).sum() / wt.sum())
+                )], ignore_index=True)
+            else:
+                oSeries = pd.concat([oSeries, pd.Series(
+                   np.nan
+                )], ignore_index=True)
+        else:
+            if wt.sum() != 0:
+                oSeries = pd.Series(((val * wt).sum() / wt.sum()))
+            else:
+                oSeries = np.nan
 
     return oSeries
 
