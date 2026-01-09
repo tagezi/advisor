@@ -328,9 +328,8 @@ class BondAnalysis:
         """
         oAmort = self.check_is_in_db(sSECID, 'amort')
 
-        if bExcludeAmor:
-            if len(oAmort.index) > 1:
-                return True
+        if len(oAmort.index) > 1:
+            return True
 
         return False
 
