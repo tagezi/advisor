@@ -131,21 +131,21 @@ class MainWindow(QMainWindow):
         oFileMenu.addAction(self.oExitAct)
 
         # Create Edit menu
-        oEdit = oMenuBar.addMenu('&Правка')
-        oEdit.addAction(self.oFind)
+        oEditMenu = oMenuBar.addMenu('&Правка')
+        oEditMenu.addAction(self.oFind)
 
         # Create Tool menu
-        oTools = oMenuBar.addMenu('&Инструменты')
-        oTools.addAction(self.oStockAnalysis)
-        oFileMenu.addSeparator()
-        oTools.addAction(self.oBondAnalysis)
-        oTools.addAction(self.oOFZBondAnalysis)
+        oToolsMenu = oMenuBar.addMenu('&Инструменты')
+        oToolsMenu.addAction(self.oStockAnalysis)
+        oToolsMenu.addSeparator()
+        oToolsMenu.addAction(self.oBondAnalysis)
+        oToolsMenu.addAction(self.oOFZBondAnalysis)
 
         # Create Info menu
-        oInfo = oMenuBar.addMenu('&Данные')
-        oInfo.addAction(self.oBoundInfo)
-        oInfo.addAction(self.oShareInfo)
-        oInfo.addAction(self.oIssuerInfo)
+        oInfoMenu = oMenuBar.addMenu('&Данные')
+        oInfoMenu.addAction(self.oBoundInfo)
+        oInfoMenu.addAction(self.oShareInfo)
+        oInfoMenu.addAction(self.oIssuerInfo)
 
         # Create Help menu
         oHelpMenu = oMenuBar.addMenu('&Справка')
