@@ -65,6 +65,7 @@ class MainWindow(QMainWindow):
         self.oFind = None
         self.oTableDataOFZ = pd.DataFrame()
         self.sPathApp = sPath
+        sDBFile = None
         oConfigProgram = ConfigProgram(self.sPathApp)
         sBasePath = oConfigProgram.sDir
         sDBPath = oConfigProgram.get_config_value('DB', 'db_path')
