@@ -22,6 +22,8 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QComboBox, QDialog, QHBoxLayout, QVBoxLayout, \
     QLabel, QLineEdit, QPushButton, QTextEdit
 
+from advisor.ui.file_dialogs import OpenFileDialog
+
 
 class ADialogApplyButtons(QDialog):
     """An abstract class that creates a block of Apply, OK, Cancel buttons and
@@ -30,6 +32,10 @@ class ADialogApplyButtons(QDialog):
     def __init__(self, oConnector, oParent=None):
         """ Initiating a class. """
         super(ADialogApplyButtons, self).__init__(oParent)
+        self.oHLayoutButtons = None
+        self.oButtonApply = None
+        self.oButtonOk = None
+        self.oButtonCancel = None
         self.oConnector = oConnector
         self.init_UI_button_block()
         self.connect_actions_button()
@@ -38,11 +44,11 @@ class ADialogApplyButtons(QDialog):
         """ Creates a block of buttons for further use in child dialog classes.
         """
         self.oHLayoutButtons = QHBoxLayout()
-        self.oButtonApply = QPushButton(_('Apply'), self)
+        self.oButtonApply = QPushButton('Apply', self)
         self.oButtonApply.setFixedWidth(80)
-        self.oButtonOk = QPushButton(_('Ok'), self)
+        self.oButtonOk = QPushButton('Ok', self)
         self.oButtonOk.setFixedWidth(80)
-        self.oButtonCancel = QPushButton(_('Cancel'), self)
+        self.oButtonCancel = QPushButton('Cancel', self)
         self.oButtonCancel.setFixedWidth(80)
 
         self.oHLayoutButtons.addWidget(self.oButtonApply,
@@ -69,6 +75,16 @@ class ADialogApplyButtons(QDialog):
         data to be saved, you must override the method onClickApply."""
         self.onClickApply()
         self.close()
+
+
+class AOneButton(QDialog):
+    """An abstract class that creates a block of Apply, OK, Cancel buttons and
+    reserves action methods for them."""
+
+    def __init__(self, oParent=None):
+        """ Initiating a class. """
+        super(AOneButton, self).__init__(oParent)
+
 
 
 class AComboBox:
@@ -149,7 +165,7 @@ class HComboBox(AComboBox, QHBoxLayout):
         return self.itemAt(1).widget()
 
 
-class VComboBox(QVBoxLayout):
+class VComboBox(AComboBox, QVBoxLayout):
     """ Creates a block that units QLabel, QComboBox and QLineEdit. Also, it
     creates methods that change parameters inside block without direct access.
     """
@@ -163,74 +179,16 @@ class VComboBox(QVBoxLayout):
         return self.itemAt(1).widget()
 
 
-class HLineEdit(QHBoxLayout):
+class ALineEdit:
     """ Creates a block that units QLabel and QLineEdit. Also, it creates
     methods that change parameters inside block without direct access.
     """
 
     def __init__(self, sLabel='', iSize=300, oParent=None):
-        super(QHBoxLayout, self).__init__(oParent)
-        oLabel = QLabel()
-        oLineEdit = QLineEdit()
-        oLineEdit.setStyleSheet('QLineEdit {margin-top:5px}')
-        self.addWidget(oLabel)
-        self.addWidget(oLineEdit)
-        self.set_line_width()
-        self.set_label(sLabel)
-        self.set_line_width(iSize)
-
-    def get_text(self):
-        """ The function gets text from QLineEdit.
-
-        :return: Selected text from QLineEdit.
-        :rtype: str
-        """
-        oLineEdit = self.itemAt(1).widget()
-        return oLineEdit.text().strip()
-
-    def set_text(self, sString=''):
-        """ Set up text into QLineEdit of the block.
-
-        :param sString: A string which display by default in QLineEdit.
-        :type sString: str
-        :return: None
-        """
-        oLineEdit = self.itemAt(1).widget()
-        oLineEdit.setText(sString)
-
-    def set_label(self, sString=''):
-        """ Set up text into Label of block.
-
-        :param sString: A string which needs to display as Label in the block.
-        :type sString: str
-        :return: None
-        """
-        oLabel = self.itemAt(0).widget()
-        oLabel.setText(sString)
-
-    def set_line_width(self, iSize=300):
-        """ Set up width of QLineEdit.
-
-        :param iSize: A number which point to width of QComboBox.
-        :type iSize: int
-        :return: None
-        """
-        oLineEdit = self.itemAt(1).widget()
-        oLineEdit.setFixedWidth(iSize)
-
-
-class VLineEdit(QVBoxLayout):
-    """ Creates a block that units QLabel and QLineEdit. Also, it creates
-    methods that change parameters inside block without direct access.
-    """
-
-    def __init__(self, sLabel='', iSize=300, oParent=None):
-        super(QVBoxLayout, self).__init__(oParent)
-        oLabel = QLabel()
-        oLineEdit = QLineEdit()
-        oLineEdit.setStyleSheet('QLineEdit {margin-left:5px}')
-        self.addWidget(oLabel)
-        self.addWidget(oLineEdit)
+        super().__init__(oParent)
+        self.oLabel = QLabel()
+        self.oLineEdit = QLineEdit()
+        self.oLineEdit.setStyleSheet('QLineEdit {margin-top:5px}')
         self.set_line_width(iSize)
         self.set_label(sLabel)
 
@@ -240,8 +198,7 @@ class VLineEdit(QVBoxLayout):
         :return: Selected text from QLineEdit.
         :rtype: str
         """
-        oLineEdit = self.itemAt(1).widget()
-        return oLineEdit.text().strip()
+        return self.oLineEdit.text().strip()
 
     def set_text(self, sString=''):
         """ Set up text into QLineEdit of the block.
@@ -250,8 +207,7 @@ class VLineEdit(QVBoxLayout):
         :type sString: str
         :return: None
         """
-        oLineEdit = self.itemAt(1).widget()
-        oLineEdit.setText(sString)
+        self.oLineEdit.setText(sString)
 
     def set_label(self, sString=''):
         """ Set up text into Label of block.
@@ -260,8 +216,7 @@ class VLineEdit(QVBoxLayout):
         :type sString: str
         :return: None
         """
-        oLabel = self.itemAt(0).widget()
-        oLabel.setText(sString)
+        self.oLabel.setText(sString)
 
     def set_line_width(self, iSize=300):
         """ Set up width of QLineEdit.
@@ -270,8 +225,69 @@ class VLineEdit(QVBoxLayout):
         :type iSize: int
         :return: None
         """
-        oLineEdit = self.itemAt(1).widget()
-        oLineEdit.setFixedWidth(iSize)
+        self.oLineEdit.setFixedWidth(iSize)
+
+
+class HLineEdit(ALineEdit, QHBoxLayout):
+    """ Creates a block that units QLabel and QLineEdit. Also, it creates
+    methods that change parameters inside block without direct access.
+    """
+
+    def __init__(self, sLabel='', iSize=300, oParent=None):
+        super(HLineEdit, self).__init__(sLabel, iSize, oParent)
+        self.addWidget(self.oLabel)
+        self.addWidget(self.oLineEdit)
+
+
+class HLineEditButton(ALineEdit, QHBoxLayout):
+    """ Creates a block that units QLabel, QComboBox and QLineEdit. Also, it
+    creates methods that change parameters inside block without direct access.
+    """
+
+    def __init__(self, sLabel='', iSize=300, oParent=None):
+        super(HLineEditButton, self).__init__(sLabel, iSize, oParent)
+        self.lFileName = None
+        self.addWidget(self.oLabel)
+        self.addWidget(self.oLineEdit)
+        self.oButton = QPushButton('...', oParent)
+        self.oButton.setGeometry(3, 5, 30, 20)
+        self.addWidget(self.oButton)
+        self.connect_actions_button()
+
+    def connect_actions_button(self):
+        """ The method of linking signals and button slots. """
+        self.oButton.clicked.connect(self.onSelect())
+
+    def onClick(self):
+        """ Reserves the Apply dialog button method for future use. """
+
+        ...
+
+    def onSelect(self):
+        """
+
+        :return:
+        """
+        dParameter = {'name': 'Selecting directory',
+                      'filter': 'CSV (*.csv)'}
+        oFileDialog = OpenFileDialog(self, dParameter)
+        lFileName = oFileDialog.exec()
+        if lFileName:
+            print(lFileName)
+            sFileName = str(lFileName[0])
+
+        self.oLineEdit.setText(sFileName)
+
+
+class VLineEdit(ALineEdit, QVBoxLayout):
+    """ Creates a block that units QLabel and QLineEdit. Also, it creates
+    methods that change parameters inside block without direct access.
+    """
+
+    def __init__(self, sLabel='', iSize=300, oParent=None):
+        super(VLineEdit, self).__init__(sLabel, iSize, oParent)
+        self.addWidget(self.oLabel)
+        self.addWidget(self.oLineEdit)
 
 
 class VTextEdit(QVBoxLayout):
