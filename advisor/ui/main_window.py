@@ -212,11 +212,13 @@ class MainWindow(QMainWindow):
         aMOEX.get_collection(sType='Биржевые', iLevel=0)
         aMOEX.get_collection(sType='Субъектов РФ', iLevel=0)
         aMOEX.get_markets_bonds()
+        aMOEX.get_bond_description()
         # обновляем акции
         aMOEX.get_collection(sGroup='stock_shares_tplus',
                              sCollectionName='stock_shares_one')
         aMOEX.get_collection(sGroup='stock_shares_tplus',
                              sCollectionName='stock_shares_two')
+        aMOEX.get_markets_shares()
 
     def onExportToCSV(self):
         iIndex = self.oCentralWidget.currentIndex()
