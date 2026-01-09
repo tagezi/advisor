@@ -479,25 +479,27 @@ class SQL:
         :rtype: pd.DataFrame
         """
         dfb = pd.read_sql_query(
-            "SELECT Tools.tool_type, AccountEvents.tool_code, "
-            "BondsSecurities.SHORTNAME, AccountEvents.tool_price, "
-            "AccountEvents.tool_count "
+            "SELECT Tools.tool_type, AccountEvents.event_id, "
+            "AccountEvents.tool_code, BondsSecurities.SHORTNAME, "
+            "AccountEvents.tool_price, AccountEvents.tool_count "
             "FROM AccountEvents "
             "JOIN Tools "
             "ON Tools.tool_id=AccountEvents.tool_id "
             "JOIN BondsSecurities "
-            "ON BondsSecurities.SECID=AccountEvents.tool_code; ",
+            "ON BondsSecurities.SECID=AccountEvents.tool_code "
+            "WHERE AccountEvents.tool_price is not NULL; ",
             self.oConnector)
 
         dfs = pd.read_sql_query(
-            "SELECT Tools.tool_type, AccountEvents.tool_code, "
-            "SharesCollections.SHORTNAME, AccountEvents.tool_price, "
-            "AccountEvents.tool_count "
+            "SELECT Tools.tool_type, AccountEvents.event_id, "
+            "AccountEvents.tool_code, SharesCollections.SHORTNAME, "
+            "AccountEvents.tool_price, AccountEvents.tool_count "
             "FROM AccountEvents "
             "JOIN Tools "
             "ON Tools.tool_id=AccountEvents.tool_id "
             "JOIN SharesCollections "
-            "ON SharesCollections.SECID=AccountEvents.tool_code; ",
+            "ON SharesCollections.SECID=AccountEvents.tool_code "
+            "WHERE AccountEvents.tool_price is not NULL; ",
             self.oConnector)
 
         return pd.concat([dfb, dfs], axis=0, join='outer', ignore_index=True)
