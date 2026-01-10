@@ -24,9 +24,7 @@ from io import StringIO
 from dateutil.utils import today
 
 from advisor.lib.connect import connect
-from advisor.lib.constants import FILE_DB
 from advisor.lib.service_lib import Connector
-from advisor.lib.sql import SQL
 
 
 class MOEX(Connector):

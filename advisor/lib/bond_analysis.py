@@ -23,8 +23,6 @@ from advisor.lib.finance import Inflation
 from advisor.lib.math import price_normalization, face_value_inflation, \
     by_inflation, ofz_bond_profit, ofz_bond_profit_percent, percent_year
 from advisor.lib.moex import MOEX
-from advisor.lib.sql import SQL
-from advisor.lib.constants import FILE_DB
 
 
 def get_data(oTableData, sSECID):

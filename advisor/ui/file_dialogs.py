@@ -17,8 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtWidgets import QPushButton, QLabel, QFileDialog
+from PyQt6.QtWidgets import QFileDialog
 
 
 class OpenFileDialog(QFileDialog):
