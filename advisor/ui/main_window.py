@@ -28,6 +28,7 @@ from advisor.lib.moex import MOEXUpdate
 from advisor.lib.portfolio import Portfolio
 from advisor.ui.help_dialog import About
 from advisor.ui.html_pages import InfoBonds
+from advisor.ui.plots import MplCanvas
 from advisor.ui.setting_dialog import SettingDialog
 from advisor.ui.tab_widget import TabWidget
 from advisor.ui.table_widget import TableWidget
@@ -36,6 +37,7 @@ from advisor.lib.config import ConfigProgram
 from advisor.lib.sql import SQL, check_connect_db
 from advisor.lib.str import str_get_file_patch
 from advisor.ui.tool_dialogs import SelectBondsDialog
+from advisor.lib.yeld_curve import YeldCurve
 
 
 class MainWindow(QMainWindow):
@@ -46,6 +48,8 @@ class MainWindow(QMainWindow):
         """
         super().__init__()
 
+        self.oYieldCurve = None
+        self.oForwardRate = None
         self.oExportToCSV = None
         self.oOFZBondAnalysis = None
         self.oBondAnalysis = None
@@ -107,6 +111,10 @@ class MainWindow(QMainWindow):
         self.oBondAnalysis = QAction('Таблица облигаций')
         self.oOFZBondAnalysis = QAction('Таблица ОФЗ')
 
+        # Plots
+        self.oYieldCurve = QAction('Кривая бескупонной доходности')
+        self.oForwardRate = QAction('Форвардная кривая')
+
         # Info
         self.oBoundInfo = QAction('Облигация')
         self.oShareInfo = QAction('Акция')
@@ -140,6 +148,11 @@ class MainWindow(QMainWindow):
         oToolsMenu.addSeparator()
         oToolsMenu.addAction(self.oBondAnalysis)
         oToolsMenu.addAction(self.oOFZBondAnalysis)
+
+        # Create Plots
+        oPlotsMenu = oMenuBar.addMenu('&Диаграммы')
+        oPlotsMenu.addAction(self.oYieldCurve)
+        oPlotsMenu.addAction(self.oForwardRate)
 
         # Create Info menu
         oInfoMenu = oMenuBar.addMenu('&Данные')
@@ -176,8 +189,55 @@ class MainWindow(QMainWindow):
         self.oBondAnalysis.triggered.connect(self.onBoundSelect)
         self.oOFZBondAnalysis.triggered.connect(self.onOFZBondAnalysis)
 
+        # Plots Menu
+        self.oYieldCurve.triggered.connect(self.onYieldCurvePlots)
+        self.oForwardRate.triggered.connect(self.onForwardRatePlots)
+
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
+
+    def onYieldCurvePlots(self):
+        """
+
+        """
+        sc = MplCanvas(self)
+        oYeldCurve = YeldCurve(self.oConnector)
+        lTempVal = oYeldCurve.lTempVal
+        lKBDValues = oYeldCurve.get_KBD_values()
+        lDate, lYield = oYeldCurve.get_ofz_yeld()
+        sc.ax.plot(lTempVal, lKBDValues, label='КБД Мосбиржи', linewidth=3,
+                   linestyle='-', color = 'red')
+        sc.ax.set_ylim(min(lKBDValues)-min(lKBDValues)*0.04,
+                         max(lKBDValues)+max(lKBDValues)*0.04)
+        sc.ax.scatter(lDate, lYield, label='Доходность ОФЗ', color='blue')
+        sc.ax.set_xlabel('Срок до погашения, лет',fontsize=14)
+        sc.ax.set_ylabel('Доходность, %',fontsize=14)
+        sc.ax.set_title('Кривая доходности', fontsize=22)
+        sc.ax.grid(linestyle='--', color='gray', linewidth=0.8, alpha=0.7)
+        sc.ax.legend(fontsize=14)
+        self.oCentralWidget.add_tab(sc, 'Кривая доходности')
+
+    def onForwardRatePlots(self):
+        """
+
+        """
+        sc = MplCanvas(self)
+        oYeldCurve = YeldCurve(self.oConnector)
+        lTempVal = oYeldCurve.lTempVal
+        lKBDValues = oYeldCurve.get_KBD_values()
+        lForwardVal = oYeldCurve.get_forwards_val()
+        sc.ax.plot(lTempVal, lKBDValues, label='Спотовая кривая',
+                   linewidth=3, linestyle='-', color = 'red')
+        sc.ax.plot(lTempVal, lForwardVal, label='Форвардная кривая',
+                   linewidth=3, linestyle='-', color = 'green')
+        sc.ax.set_xlabel('Срок до погашения, лет', fontsize=14)
+        sc.ax.set_ylabel('Доходность, %', fontsize=14)
+        sTitle = 'Спотовая и форвардная кривые'
+        sc.ax.set_title(sTitle, fontsize=22)
+        sc.ax.grid(linestyle='--', color='gray', linewidth=0.8, alpha=0.7)
+        sc.ax.legend(fontsize=14)
+        self.oCentralWidget.add_tab(sc, sTitle)
+
 
     def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
         oTableData = bond_analysis_without(self.oConnector,

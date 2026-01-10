@@ -258,6 +258,68 @@ def weighted_average_pandas(dataframe):
 
     return oSeries
 
+""" 
+    Функция для расчета бескупонной доходности по методу Нельсона-Сигеля 
+"""
+# Непрерывная доходность
+def GT(t, beta0, beta1, beta2, tau, g_values):
+    # Основные члены модели
+    term1 = beta0 + beta1 * tau * (1 - np.exp(-t / tau)) / t
+    term2 = beta2 * ((1 - np.exp(-t / tau)) * tau / t - np.exp(-t / tau))
+
+    # Инициализация параметров a_i и b_i
+    a_values = np.zeros(9)
+    b_values = np.zeros(9)
+
+    # Инициализация первых значений
+    a_values[0] = 0  # a_1 = 0
+    a_values[1] = 0.6  # a_2 = 0.6
+    b_values[0] = a_values[1]  # b_1 = a_2
+
+    k = 1.6  # параметр для рекуррентного расчета
+
+    # Рекуррентное вычисление a_i и b_i
+    for i in range(2, 9):
+        a_values[i] = a_values[i - 1] + k ** (i - 1)
+        b_values[i - 1] = b_values[i - 2] * k
+
+    # Расчет суммы по экспоненциальным членам
+    term3 = 0
+    for i in range(9):
+        if b_values[i] != 0:  # Добавляем проверку на нулевые значения b_i
+            term3 += g_values[i] * np.exp(
+                -((t - a_values[i]) ** 2) / (b_values[i] ** 2))
+
+    GT = term1 + term2 + term3
+
+    return GT / 10000
+
+# Кривая бескупонной доходности в % годовых
+def get_KBD_in_year_precent(t, beta0, beta1, beta2, tau, g_values):
+    YT = 100 * (np.exp(GT(t, beta0, beta1, beta2, tau, g_values)) - 1)
+    return YT
+
+"""
+    Построение графиков спотовой и форвардной кривой
+"""
+
+# Функция для расчета цены бескупонной облигации P(0,T) на основе данных Мосбиржи
+def P_0_T(beta0, beta1, beta2, tau, g_values, T):
+    R_T = GT(T, beta0, beta1, beta2, tau, g_values)  # Бескупонная непрерывно начисляемая ставка
+    return np.exp(-R_T * T)
+
+# Форвардная ставка F(0,T)
+def F_0_T(T, beta0, beta1, beta2, tau, g_values, dt=1e-4):
+    P_T_plus_dt = P_0_T(beta0, beta1, beta2, tau, g_values, T + dt)
+    P_T = P_0_T(beta0, beta1, beta2, tau, g_values, T)
+    F_0_T = -(np.log(P_T_plus_dt) - np.log(P_T)) / dt
+    return F_0_T
+
+# форвардная ставка при годовом (эффективном) начислении, в % годовых
+def F_0_T_eff(T, beta0, beta1, beta2, tau, g_values, dt=1e-4):
+    FT = 100*(np.exp(F_0_T(T, beta0, beta1, beta2, tau, g_values, dt=1e-4)) - 1)
+    return FT
+
 
 if __name__ == '__main__':
     pass
