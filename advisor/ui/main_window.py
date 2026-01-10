@@ -206,6 +206,8 @@ class MainWindow(QMainWindow):
 
     def onImportStock(self):
         aMOEX = MOEXUpdate(self.oConnector)
+        # обновляет данные для Кривой бескупонной доходности
+        aMOEX.get_kbd()
         # обновляет облигации
         aMOEX.get_collection(sType='ОФЗ', iLevel=0)
         aMOEX.get_collection(sType='Корпоративные', iLevel=0)

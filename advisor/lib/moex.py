@@ -116,6 +116,30 @@ class MOEXUpdate(Connector):
         if not self.check_update():
             self.update_master_data()
 
+    def get_kbd(self):
+        """
+
+        """
+        # URL для API MOEX, данные по ZCYC (zero coupon yield curve)
+        sURL = "https://iss.moex.com/iss/engines/stock/zcyc/securities.json"
+
+        jJSON = connect(sURL)
+        columns = jJSON['params']['columns']
+        values = jJSON['params']['data']
+        df = pd.DataFrame(values, columns=columns)
+
+        sTable ='YieldCurve'
+        sValue = df.loc[0].iat[0]
+
+        bNotUpdated = self.oConnector.sql_get_values(sTable=sTable,
+                                                     sColumns='tradedate',
+                                                     sWhere='tradedate',
+                                                     tValues=(sValue,))
+        if not bNotUpdated:
+            sColumns = ', '.join(df.columns.tolist())
+            lData = df.loc[0].tolist()
+            self.insert_rows(sTable, sColumns, lData)
+
     def get_markets_bonds(self):
         """ Получает таблицу инструментов торговой сессии по рынку облигаций
         """
