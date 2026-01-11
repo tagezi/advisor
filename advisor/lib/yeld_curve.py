@@ -35,7 +35,7 @@ class YeldCurve:
                                           'LIMIT 1;').fetchone()
 
         # Временные точки для расчета (например, от 0 до 30 лет)
-        self.lTempVal = np.linspace(0.01, 20, 1500)
+        self.lTempVal = np.linspace(0.01, 17.5, 1500)
         # Значения КБД для расчета
         self.fBeta0 = lQuery[3]
         self.fBeta1 = lQuery[4]
