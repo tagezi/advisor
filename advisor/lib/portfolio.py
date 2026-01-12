@@ -16,6 +16,7 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import numpy as np
 import pandas as pd
 
 from advisor.lib.math import weighted_average_pandas
@@ -61,7 +62,10 @@ class Portfolio:
         oPortfolio.columns = ['Тип актива', 'Код актива', 'Имя актива',
                               'Средняя цена покупки', 'Количество', 'Сумма']
 
-        return oPortfolio.dropna()
+        oPortfolio = oPortfolio.dropna()
+        oPortfolio.index = np.arange(1, len(oPortfolio) + 1)
+
+        return oPortfolio
 
 
 if __name__ == '__main__':
