@@ -125,6 +125,11 @@ class TableWidget(QTableView):
         super().__init__()
         self.dTableData = data
         self.bColor = bColor
+        self.setStyleSheet("QTableView { font-size: 11pt; }")
+        self.horizontalHeader().setStyleSheet(
+            "QHeaderView::section { font-size: 11pt; }")
+        self.verticalHeader().setStyleSheet(
+            "QHeaderView::section { font-size: 11pt; }")
         self.setData()
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
