@@ -237,9 +237,10 @@ class BondAnalysis:
     def __init__(self, oConnector, oPD=pd):
         """
 
-        :param oConnector: Доступ к базе данных и API класса SQL
+        :param oConnector: Доступ к API базы данных класса SQL.
         :type oConnector: advisor.lib.sql.SQL
         :param oPD:
+        :type oPD: pd.DataFrame
         """
         self.oConnector = oConnector
         self.oPD = oPD
@@ -249,10 +250,12 @@ class BondAnalysis:
     def check_is_in_db(self, sSECID, sProperty):
         """
 
-        :param sSECID: SECID ценной бумаги на мосбирже
+        :param sSECID: SECID ценной бумаги на Мосбирже
         :type sSECID: str
         :param sProperty:
+        :type sProperty: str
         :return:
+        :rtype: pd.DataFrame
         """
         tValues = (sSECID,)
         if sProperty == 'amort':
@@ -294,6 +297,28 @@ class BondAnalysis:
                            iMinPeriod=30,
                            iMaxPeriod=182,
                            fPercent=1):
+        """ Делает запрос к API базы данных для выборки облигаций.
+
+        Это промежуточная функция созданная для оптимизации кода. Сделать
+        выборку облигаций можно напрямую, обратившись к методу
+        get_bonds_by_value класс SQL.
+
+        :param iInitialFaceValue: Начальная номинальная стоимость облигации.
+        :type iInitialFaceValue: int
+        :param sFaceUnit: Валюта облигации (для рублей SUR)
+        :type sFaceUnit: str
+        :param bOFZ: Флаг, нужно ли отбирать только ОФЗ.
+        :type bOFZ: bool
+        :param iMinPeriod: Минимальный период для купона в днях.
+        :type iMinPeriod: int
+        :param iMaxPeriod: Максимальный период для купона в днях.
+        :type iMaxPeriod: int
+        :param fPercent: Минимальное значение купона в процентах за год.
+        :type fPercent: float
+        :return: Возвращает таблицу Pandas сос писком облигаций отобранных по
+        запросу.
+        :rtype: pd.DataFrame
+        """
         oQuery = self.oConnector.get_bonds_by_value(
             pd=self.oPD,
             iInitialFaceValue=iInitialFaceValue,
@@ -309,21 +334,22 @@ class BondAnalysis:
     def get_bond_info(self, sSECID):
         """
 
-        :param sSECID: SECID ценной бумаги на мосбирже
+        :param sSECID: SECID ценной бумаги на мосбирже.
         :type sSECID: str
         :return:
         """
         return self.oQuery.get_bound_info(sSECID)
 
     def get_check_amort(self, sSECID):
-        """ Проверяет амортизацию облигации в базе данных. Если амортизация
-        больше 1, то облигация с амортизацией. При амортизации равной 1
-        амортизация осуществляется при погашении облигации.
+        """ Проверяет амортизацию облигации в базе данных.
+
+        Если амортизация больше 1, то облигация с амортизацией. При амортизации
+        равной 1 амортизация осуществляется при погашении облигации.
 
         :param sSECID: SECID ценной бумаги на мосбирже
         :type sSECID: str
         :return: Возвращает значение Истина или Ложь в зависимости от
-         амортизации облигации
+        амортизации облигации
         :rtype: bool
         """
         oAmort = self.check_is_in_db(sSECID, 'amort')
@@ -334,13 +360,16 @@ class BondAnalysis:
         return False
 
     def get_future(self, sSECID, sWhat='coupons'):
-        """
+        """ Возвращает информацию о будущих купонов или амортизации.
 
-        :param sSECID: SECID ценной бумаги на мосбирже
+        :param sSECID: SECID ценной бумаги на Мосбирже.
         :type sSECID: str
-        :param sWhat:
+        :param sWhat: Указывает, что искать: даты амортизации или купонов.
         :type sWhat: str
-        :return: pd.DataFrame
+        :return: Возвращает DataFrame Pandas со столбцами **Дата купона**,
+        **Номинальная стоимость**, **Величина купона в валюте**,
+        **Величина купона в процентах**.
+        :rtype: pd.DataFrame
         """
         if sWhat == 'coupons':
             sProperty = 'coupons'
