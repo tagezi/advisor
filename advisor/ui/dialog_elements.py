@@ -86,7 +86,6 @@ class AOneButton(QDialog):
         super(AOneButton, self).__init__(oParent)
 
 
-
 class AComboBox:
     """ Это абстрактный сырой класс, который задаёт только поведение элемента
     combobox и пренадлежащих ему в форме элементов"""

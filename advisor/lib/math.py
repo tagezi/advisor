@@ -258,9 +258,12 @@ def weighted_average_pandas(dataframe):
 
     return oSeries
 
-""" 
-    Функция для расчета бескупонной доходности по методу Нельсона-Сигеля 
+
 """
+    Функция для расчета бескупонной доходности по методу Нельсона-Сигеля
+"""
+
+
 # Непрерывная доходность
 def GT(t, beta0, beta1, beta2, tau, g_values):
     # Основные члены модели
@@ -294,19 +297,24 @@ def GT(t, beta0, beta1, beta2, tau, g_values):
 
     return GT / 10000
 
+
 # Кривая бескупонной доходности в % годовых
 def get_KBD_in_year_precent(t, beta0, beta1, beta2, tau, g_values):
     YT = 100 * (np.exp(GT(t, beta0, beta1, beta2, tau, g_values)) - 1)
     return YT
 
+
 """
     Построение графиков спотовой и форвардной кривой
 """
 
-# Функция для расчета цены бескупонной облигации P(0,T) на основе данных Мосбиржи
+
+# Функция для расчета цены бескупонной облигации на основе данных Мосбиржи
 def P_0_T(beta0, beta1, beta2, tau, g_values, T):
-    R_T = GT(T, beta0, beta1, beta2, tau, g_values)  # Бескупонная непрерывно начисляемая ставка
+    # Бескупонная непрерывно начисляемая ставка
+    R_T = GT(T, beta0, beta1, beta2, tau, g_values)
     return np.exp(-R_T * T)
+
 
 # Форвардная ставка F(0,T)
 def F_0_T(T, beta0, beta1, beta2, tau, g_values, dt=1e-4):
@@ -315,9 +323,10 @@ def F_0_T(T, beta0, beta1, beta2, tau, g_values, dt=1e-4):
     F_0_T = -(np.log(P_T_plus_dt) - np.log(P_T)) / dt
     return F_0_T
 
+
 # форвардная ставка при годовом (эффективном) начислении, в % годовых
 def F_0_T_eff(T, beta0, beta1, beta2, tau, g_values, dt=1e-4):
-    FT = 100*(np.exp(F_0_T(T, beta0, beta1, beta2, tau, g_values, dt=1e-4)) - 1)
+    FT = 100*(np.exp(F_0_T(T, beta0, beta1, beta2, tau, g_values, dt)) - 1)
     return FT
 
 

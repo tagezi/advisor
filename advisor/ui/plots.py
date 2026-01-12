@@ -25,4 +25,4 @@ class MplCanvas(FigureCanvas):
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         # Create a figure and axes
         self.fig, self.ax = plt.subplots(figsize=(width, height), dpi=dpi)
-        super().__init__(self.fig) # Correct call to super().__init__
+        super().__init__(self.fig)

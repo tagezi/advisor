@@ -35,7 +35,11 @@ def str_by_locale(aNumber=1000):
     :rtype: str
     """
     try:
-        return locale.format_string('%.2f', aNumber, grouping=True, monetary=True)
+        return locale.format_string('%.2f',
+                                    aNumber,
+                                    grouping=True,
+                                    monetary=True
+                                    )
     except TypeError:
         return aNumber
 

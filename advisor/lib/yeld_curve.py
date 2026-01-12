@@ -25,6 +25,7 @@ from advisor.lib.constants import DAYS
 from advisor.lib.math import get_KBD_in_year_precent
 from advisor.lib.math import F_0_T_eff
 
+
 class YeldCurve:
     def __init__(self, oConnector, oPD=pd):
         self.oPD = oPD
@@ -59,7 +60,9 @@ class YeldCurve:
 
         :return:
         """
-        oQuery = self.oConnector.get_bonds_by_value(pd=self.oPD, bOFZ=True)
+        oQuery = self.oConnector.get_bonds_by_value(pd=self.oPD,
+                                                    bOFZ=True,
+                                                    )
         lMatData = oQuery['MATDATE'].tolist()
         lYield = oQuery['YIELDATPREVWAPRICE'].tolist()
 

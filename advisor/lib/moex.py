@@ -126,7 +126,7 @@ class MOEXUpdate(Connector):
         values = jJSON['params']['data']
         df = pd.DataFrame(values, columns=columns)
 
-        sTable ='YieldCurve'
+        sTable = 'YieldCurve'
         sValue = df.loc[0].iat[0]
 
         bNotUpdated = self.oConnector.sql_get_values(sTable=sTable,

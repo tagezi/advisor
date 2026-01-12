@@ -238,13 +238,13 @@ class MainWindow(QMainWindow):
         lKBDValues = oYeldCurve.get_KBD_values()
         lDate, lYield = oYeldCurve.get_ofz_yeld()
         oCanvas.ax.plot(lTempVal, lKBDValues, label='КБД Мосбиржи',
-                   linestyle='-', color = 'red')
+                        linestyle='-', color='red')
         fMin = min(min(lKBDValues), min(lYield))
         fMax = max(max(lKBDValues), max(lYield))
         oCanvas.ax.set_ylim(fMin - fMin * 0.04, fMax + fMax * 0.04)
         oCanvas.ax.scatter(lDate, lYield, label='Доходность ОФЗ', color='blue')
-        oCanvas.ax.set_xlabel('Срок до погашения, лет',fontsize=14)
-        oCanvas.ax.set_ylabel('Доходность, %',fontsize=14)
+        oCanvas.ax.set_xlabel('Срок до погашения, лет', fontsize=14)
+        oCanvas.ax.set_ylabel('Доходность, %', fontsize=14)
         sTitle = 'Кривая бескупонной доходности ОФЗ'
         oCanvas.ax.set_title(sTitle, fontsize=22)
         oCanvas.ax.grid(linestyle='--', color='gray', linewidth=0.8, alpha=0.7)
@@ -264,9 +264,9 @@ class MainWindow(QMainWindow):
         fMax = max(max(lKBDValues), max(lForwardVal))
         oCanvas.ax.set_ylim(fMin - fMin * 0.04, fMax + fMax * 0.04)
         oCanvas.ax.plot(lTempVal, lKBDValues, label='Спотовая кривая',
-                   linestyle='-', color = 'red')
+                        linestyle='-', color='red')
         oCanvas.ax.plot(lTempVal, lForwardVal, label='Форвардная кривая',
-                   linestyle='-', color = 'green')
+                        linestyle='-', color='green')
         oCanvas.ax.set_xlabel('Срок до погашения, лет', fontsize=14)
         oCanvas.ax.set_ylabel('Доходность, %', fontsize=14)
         sTitle = 'Спотовая и форвардная кривые'
@@ -274,7 +274,6 @@ class MainWindow(QMainWindow):
         oCanvas.ax.grid(linestyle='--', color='gray', linewidth=0.8, alpha=0.7)
         oCanvas.ax.legend(fontsize=14)
         self.oCentralWidget.add_tab(oCanvas, sTitle)
-
 
     def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
         oTableData = bond_analysis_without(self.oConnector,

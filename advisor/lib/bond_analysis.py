@@ -51,8 +51,8 @@ def get_data(oTableData, sSECID):
 
     return fPrice, fACC, sMatDate
 
-#TODO: Сделать возможность выбора показа значений доходности с учетом инфляции,
-# налогов и комиссий брокера и биржи
+
+# TODO: Добавить возможность показа доходности с учетом инфляции, комиссий
 def bond_analysis(dTableData, oTableData, bInfl, fInflMedian5, fInflMedian10):
     """ Удаляет бумаги с амортизацией и формирует таблицу для показа на вкладке
 
@@ -294,14 +294,16 @@ class BondAnalysis:
                            iMinPeriod=30,
                            iMaxPeriod=182,
                            fPercent=1):
-        oQuery = self.oConnector.get_bonds_by_value(pd=self.oPD,
-                                                    iInitialFaceValue=iInitialFaceValue,
-                                                    sFaceUnit=sFaceUnit,
-                                                    bOFZ=bOFZ,
-                                                    iMinPeriod=iMinPeriod,
-                                                    iMaxPeriod=iMaxPeriod,
-                                                    fPercent=fPercent
-                                                    )
+        oQuery = self.oConnector.get_bonds_by_value(
+            pd=self.oPD,
+            iInitialFaceValue=iInitialFaceValue,
+            sFaceUnit=sFaceUnit,
+            bOFZ=bOFZ,
+            iMinPeriod=iMinPeriod,
+            iMaxPeriod=iMaxPeriod,
+            fPercent=fPercent
+            )
+
         return oQuery
 
     def get_bond_info(self, sSECID):

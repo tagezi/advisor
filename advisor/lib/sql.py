@@ -208,7 +208,7 @@ class SQL:
         """ Returns information about columns in a table (cid, name, type,
          notnull, dflt_value, pk)
 
-        :param sTable: The table name for which information needs to be returned
+        :param sTable: The table name for which info needs to be returned
         :type sTable: str
         :return: information about columns
         :rtype: list
@@ -507,7 +507,7 @@ class SQL:
     def get_bonds_by_value(self, pd, iInitialFaceValue=1000, sFaceUnit='SUR',
                            fMinYield=10, fMaxYield=30, bOFZ=False,
                            iMinPeriod=30, iMaxPeriod=182, fMinCouponValue=0,
-                           fPercent=1.0 ):
+                           fPercent=1.0, sMatDate="2028-01-01"):
         """ Выборка облигаций из Представления в базе данных.
 
         :param pd: Объект Pandas
@@ -565,7 +565,7 @@ class SQL:
             sQuery = f" {sQuery} AND BondsSecurities.SHORTNAME like \"%ОФЗ%\" "
         else:
             sQuery = (
-                f" {sQuery} AND BondsSecurities.YIELDATPREVWAPRICE>{fMinYield} "
+                f"{sQuery} AND BondsSecurities.YIELDATPREVWAPRICE>{fMinYield} "
                 f"AND BondsSecurities.YIELDATPREVWAPRICE<{fMaxYield} "
                 f"AND BondsSecurities.MATDATE>\"2028-01-01\" "
             )
