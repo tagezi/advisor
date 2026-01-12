@@ -567,7 +567,7 @@ class SQL:
             sQuery = (
                 f"{sQuery} AND BondsSecurities.YIELDATPREVWAPRICE>{fMinYield} "
                 f"AND BondsSecurities.YIELDATPREVWAPRICE<{fMaxYield} "
-                f"AND BondsSecurities.MATDATE>\"2028-01-01\" "
+                f"AND BondsSecurities.MATDATE>\"{sMatDate}\" "
             )
 
         sQuery = f" {sQuery} GROUP BY BondsSecurities.MATDATE;"
