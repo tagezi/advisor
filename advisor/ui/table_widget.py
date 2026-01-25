@@ -22,7 +22,7 @@ from PyQt6.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QTableView
 
-from advisor.lib.constants import COLORYIELD, COLODMATDATE
+from advisor.lib.constants import COLORYIELD, COLORMATDATE
 from advisor.lib.math import bring_number_into_range, years
 
 

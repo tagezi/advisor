@@ -16,7 +16,7 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from advisor.lib.constants import FILE_DB
+from advisor.lib.constants import DB_PATH
 from advisor.lib.sql import SQL
 
 
@@ -25,7 +25,7 @@ class Connector:
         if oConnector:
             self.oConnector = oConnector
         else:
-            self.oConnector = SQL(FILE_DB)
+            self.oConnector = SQL(DB_PATH)
 
 
 if __name__ == '__main__':

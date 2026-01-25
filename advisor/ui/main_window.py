@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
         sDBFile = None
         oConfigProgram = ConfigProgram(self.sPathApp)
         sBasePath = oConfigProgram.sDir
-        sDBPath = oConfigProgram.get_config_value('DB', 'db_path')
+        sDBPath = oConfigProgram.get_config_value('PATH', 'db_path')
         sDBDir = oConfigProgram.get_config_value('DB', 'db_dir')
         if not sDBPath:
             sDBFile = oConfigProgram.get_config_value('DB', 'db_file')
@@ -323,7 +323,7 @@ class MainWindow(QMainWindow):
         iIndex = self.oCentralWidget.currentIndex()
         oTable = self.oCentralWidget.findChildren(TableWidget)
         oData = today().strftime('%Y%m%d')
-        filepath = Path(f'')
+        filepath = Path(f'~/{oData}.csv')
         filepath.parent.mkdir(parents=True, exist_ok=True)
         oTable[iIndex].dTableData.to_csv(filepath, decimal=',',
                                          date_format='%Y.%m.%d')

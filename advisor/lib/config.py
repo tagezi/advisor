@@ -77,6 +77,8 @@ class ConfigProgram(ConfigParser):
         """
         super().__init__()
 
+        self.inline_comment_prefixes = ';'
+
         if sys.path[0] == sPathApp:
             self.sDir = str_get_path(sys.path[0])
         else:
