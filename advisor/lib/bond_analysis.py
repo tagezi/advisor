@@ -258,14 +258,13 @@ class BondAnalysis:
         :rtype: pd.DataFrame
         """
         tValues = (sSECID,)
+        sWhere = 'SECID'
         if sProperty == 'amort':
-            sWhere = 'SECID'
             sField = 'amortizations'
             sTable = "BoundAmortizations"
             sColumns = "amort_date, face_value, valueprc, amort_value"
             sColumn = 'amort_date'
         else:
-            sWhere = 'SECID'
             sField = 'coupons'
             sTable = "BoundCoupons"
             sColumns = "coupon_date, face_value, coupon_value, valueprc"
@@ -379,9 +378,8 @@ class BondAnalysis:
             sField = 'amort_date'
 
         oCoupons = self.check_is_in_db(sSECID, sProperty)
-        oFuture = oCoupons.loc[(oCoupons[sField] > self.sTime)]
 
-        return oFuture
+        return oCoupons.loc[(oCoupons[sField] > self.sTime)]
 
 
 if __name__ == '__main__':
