@@ -46,7 +46,7 @@ file.
 import sys
 from configparser import ConfigParser, NoSectionError
 
-from advisor.lib.str import str_get_file_patch
+from advisor.lib.str import str_get_file_patch, str_get_path
 
 
 class ConfigProgram(ConfigParser):
@@ -77,7 +77,10 @@ class ConfigProgram(ConfigParser):
         """
         super().__init__()
 
-        self.sDir = sys.path[0]
+        if sys.path[0] == sPathApp:
+            self.sDir = str_get_path(sys.path[0])
+        else:
+            self.sDir = sys.path[0]
 
         self.sFilePath = str_get_file_patch(self.sDir, sFilePath)
         self.read(self.sFilePath)
