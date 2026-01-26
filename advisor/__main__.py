@@ -24,7 +24,6 @@ from advisor.ui.main_window import MainWindow
 
 
 path = path.dirname(path.realpath(__file__))
-print(path)
 app = QApplication(sys.argv)
 sheet = MainWindow(path)
 sys.exit(app.exec())
