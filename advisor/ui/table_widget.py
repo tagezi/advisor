@@ -86,7 +86,7 @@ class PandasModel(QAbstractTableModel):
                     return QColor(lColor[iValue])
 
                 if self._DataFrame.columns[index.column()] == 'Дата погашения':
-                    lColor = COLODMATDATE.copy()
+                    lColor = COLORMATDATE.copy()
                     fYears = years(self._DataFrame.iloc[
                                        index.row(), index.column()
                                    ])
