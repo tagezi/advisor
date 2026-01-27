@@ -20,8 +20,8 @@ import time
 import requests
 
 
-def connect(url, api_delay=1.2, only=None, start=-1, limit=100, parameter=None,
-            values=''):
+def connect(url, api_delay=1.2, only=None, start=-1, limit=100,
+            parameter=None, values=''):
     """ Забирает информацию в виде запроса JSON возвращает словарь
 
     :param only: указывает, какое/какие поля вернуть

@@ -86,7 +86,8 @@ class MOEX(Connector):
         sURL = f'{self.sDomaine}{self.sFaild}statistics/engines/stock/' \
                f'markets/bonds/bondization/{sSECID}.json'
 
-        jJSON = connect(sURL, sField, 0, 100)
+        jJSON = connect(sURL, api_delay=1.2, only=None,
+                        start=-1, limit=100, values=sField)
         oDatesAndCouponList = oPD.read_json(StringIO(json.dumps(
             jJSON.get(sField).get('data'))), orient='columns')
         oDatesAndCouponList.columns = jJSON.get(sField).get('columns')
@@ -121,7 +122,7 @@ class MOEXUpdate(Connector):
         # URL для API MOEX, данные по ZCYC (zero coupon yield curve)
         sURL = "https://iss.moex.com/iss/engines/stock/zcyc/securities.json"
 
-        jJSON = connect(sURL)
+        jJSON = connect(sURL, api_delay=1.2, only=None, start=-1, limit=100)
         columns = jJSON['params']['columns']
         values = jJSON['params']['data']
         df = pd.DataFrame(values, columns=columns)
@@ -143,7 +144,7 @@ class MOEXUpdate(Connector):
         """
         sURL = ('https://iss.moex.com/'
                 'iss/engines/stock/markets/bonds/securities.json')
-        jJSON = connect(sURL)
+        jJSON = connect(sURL, api_delay=1.2, only=None, start=-1, limit=100)
 
         # Bond Securities
         self.update_data(jJSON=jJSON,
@@ -160,7 +161,7 @@ class MOEXUpdate(Connector):
         """
         sURL = ('https://iss.moex.com/iss/engines/stock/markets/shares/'
                 'boards/TQBR/securities.json')
-        jJSON = connect(sURL)
+        jJSON = connect(sURL, api_delay=1.2, only=None, start=-1, limit=100)
 
         # Shares Securities
         self.update_data(jJSON=jJSON,
@@ -214,6 +215,7 @@ class MOEXUpdate(Connector):
                     sURL = \
                         f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
                     jJSON = connect(sURL,
+                                    api_delay=1.2,
                                     only='description',
                                     parameter='description.columns',
                                     values='name,title,value')
@@ -235,7 +237,8 @@ class MOEXUpdate(Connector):
 
         else:
             sURL = f'https://iss.moex.com/iss/securities/{sSECID}.json'
-            jJSON = connect(sURL)
+            jJSON = connect(sURL, api_delay=1.2,
+                            only=None, start=-1, limit=100)
 
     def get_shares_description(self, sSECID=''):
         if not sSECID:
@@ -253,6 +256,7 @@ class MOEXUpdate(Connector):
                     sURL = \
                         f'https://iss.moex.com/iss/securities/{sSECID[0]}.json'
                     jJSON = connect(sURL,
+                                    api_delay=1.2,
                                     only='description',
                                     parameter='description.columns',
                                     values='name,title,value')
@@ -279,7 +283,8 @@ class MOEXUpdate(Connector):
 
         else:
             sURL = f'https://iss.moex.com/iss/securities/{sSECID}.json'
-            jJSON = connect(sURL)
+            jJSON = connect(sURL, api_delay=1.2,
+                            only=None, start=-1, limit=100)
 
     def get_collection(self, sType='', iLevel=0, sGroup='stock_bonds',
                        sCollectionName=''):
@@ -310,7 +315,8 @@ class MOEXUpdate(Connector):
 
         while iStart < iTotal:
             print(f'обновляем: {iStart} из {iTotal}')
-            jJSON = connect(sURL, iStart, 100)
+            jJSON = connect(sURL, api_delay=1.2,
+                            only=None, start=iStart, limit=100)
 
             if 'securities.cursor' in jJSON:
                 iTotal = jJSON['securities.cursor']['data'][0][1]
