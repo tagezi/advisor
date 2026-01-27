@@ -19,15 +19,16 @@
 import time
 import requests
 
-from advisor.lib.constants import API_DELAY
 
-
-def connect(url, only=None, start=-1, limit=100, parameter=None, values=''):
+def connect(url, api_delay=1.2, only=None, start=-1, limit=100, parameter=None,
+            values=''):
     """ Забирает информацию в виде запроса JSON возвращает словарь
 
     :param only: указывает, какое/какие поля вернуть
     :param url: URL API MOEX
     :type url: str
+    :param api_delay: задержка при запросах
+    :type api_delay: float
     :param start:
     :type start: int
     :param limit:
@@ -39,7 +40,7 @@ def connect(url, only=None, start=-1, limit=100, parameter=None, values=''):
     :return: словарь ответа
     :rtype: dict
     """
-    time.sleep(API_DELAY)
+    time.sleep(api_delay)
     headers = {
         'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0)'
                       ' Gecko/20100101 Firefox/116.0',

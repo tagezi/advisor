@@ -16,58 +16,60 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import sys
+class Constants:
+    def __init__(self, oConfig):
+        self.sBasePath = oConfig.sDir
 
-from advisor.lib.config import ConfigProgram
-from advisor.lib.str import str_get_file_patch
+        # путь до файла
+        self.DB_PATH = oConfig.get_config_value('PATH', 'db_path')
+        # путь до каталога с документами
+        self.DOC_PATH = oConfig.get_config_value('PATH', 'doc_path')
 
-oConfigProgram = ConfigProgram(sys.path[0])
-sBasePath = oConfigProgram.sDir
+        # каталог для базы данных работает, если не указан путь до неё
+        self.DBDIR = oConfig.get_config_value('DB', 'db_dir')
+        # имя базы данных работает, если не указан путь до неё
+        self.DBFILE = oConfig.get_config_value('DB', 'db_file')
 
-# путь до файла
-DB_PATH = oConfigProgram.get_config_value('PATH', 'db_path')
-# путь до каталога с документами
-DOC_PATH = oConfigProgram.get_config_value('PATH', 'doc_path')
+        # цвета для раскраски значений столбца
+        sColorYield = oConfig.get_config_value('COLORS', 'coloryield')
+        self.COLORYIELD = [item.strip() for item in sColorYield.split(',')]
 
-# каталог для базы данных работает, если не указан путь до неё
-DBDIR = oConfigProgram.get_config_value('DB', 'db_dir')
-# имя базы данных работает, если не указан путь до неё
-DBFILE = oConfigProgram.get_config_value('DB', 'db_file')
+        # цвета для визуализации периода
+        sColorMatDate = oConfig.get_config_value('COLORS', 'colormatdate')
+        self.COLORMATDATE = [item.strip() for item in sColorMatDate.split(',')]
 
-# цвета для раскраски значений столбца
-sColorYield = oConfigProgram.get_config_value('COLORS', 'coloryield')
-COLORYIELD = [item.strip() for item in sColorYield.split(',')]
+        # количество дней в году
+        self.DAYS = int(oConfig.get_config_value('TIME', 'days'))
+        # формат даты и время
+        self.DATETIME_FORMAT = \
+            oConfig.get_config_value('TIME', 'datetime_format')
+        # формат даты
+        self.DATE_FORMAT = oConfig.get_config_value('TIME', 'date_format')
 
-# цвета для визуализации периода
-sColorMatDate = oConfigProgram.get_config_value('COLORS', 'colormatdate')
-COLORMATDATE = [item.strip() for item in sColorMatDate.split(',')]
+        # полное название месяцев
+        sMonthNameRuFull = oConfig.get_config_value('TIME', 'month_name_full')
+        self.MONTHNAMESRUFULL = \
+            [item.strip() for item in sMonthNameRuFull.split(',')]
 
-# количество дней в году
-DAYS = int(oConfigProgram.get_config_value('TIME', 'days'))
-# формат даты и время
-DATETIME_FORMAT = oConfigProgram.get_config_value('TIME', 'datetime_format')
-# формат даты
-DATE_FORMAT = oConfigProgram.get_config_value('TIME', 'date_format')
+        # сокращение названий месяцев
+        sMonthNameRuShort = (
+            oConfig.get_config_value('TIME', 'month_name_short'))
+        self.MONTHNAMESRUSHORT = \
+            [item.strip() for item in sMonthNameRuShort.split(',')]
 
-# полное название месяцев
-sMonthNameRuFull = oConfigProgram.get_config_value('TIME', 'month_name_full')
-MONTHNAMESRUFULL = [item.strip() for item in sMonthNameRuFull.split(',')]
+        # сбор биржи
+        self.BIRGAFEE = float(oConfig.get_config_value('FEE', 'birgafee'))
+        # сбор брокера
+        self.BROKERFEE = float(oConfig.get_config_value('FEE', 'brokerfee'))
+        # налоговый сбор
+        TAX = float(oConfig.get_config_value('FEE', 'taxfee'))
 
-# сокращение названий месяцев
-sMonthNameRuShort = oConfigProgram.get_config_value('TIME', 'month_name_short')
-MONTHNAMESRUSHORT = [item.strip() for item in sMonthNameRuShort.split(',')]
-
-# сбор биржи
-BIRGAFEE = float(oConfigProgram.get_config_value('FEE', 'birgafee'))
-# сбор брокера
-BROKERFEE = float(oConfigProgram.get_config_value('FEE', 'brokerfee'))
-# налоговый сбор
-TAX = float(oConfigProgram.get_config_value('FEE', 'taxfee'))
-
-# значение свободных средств для расчета эффективной доходности
-TEMPPORTFILIO = int(oConfigProgram.get_config_value('SERVICE', 'tempportfolio'))
-# Переменная для задержки API запросов, лимит в 50 запросов в минуту
-API_DELAY = float(oConfigProgram.get_config_value('SERVICE', 'api_delay'))
+        # значение свободных средств для расчета эффективной доходности
+        self.TEMPPORTFILIO = (
+            int(oConfig.get_config_value('SERVICE', 'tempportfolio')))
+        # Переменная для задержки API запросов, лимит в 50 запросов в минуту
+        self.API_DELAY = (
+            float(oConfig.get_config_value('SERVICE', 'api_delay')))
 
 
 if __name__ == '__main__':

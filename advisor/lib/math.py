@@ -23,8 +23,6 @@ import numpy as np
 import pandas as pd
 from dateutil.utils import today
 
-from advisor.lib.constants import DAYS, BIRGAFEE, BROKERFEE, TAX
-
 
 def black_scholes(S0=100., K=105., T=1.0, r=0.05, sigma=0.2, i=100000):
     """ Формула расчета стоимости опциона """
@@ -66,7 +64,7 @@ def bring_number_into_range(value, min_src, max_src, min_dest=0, max_dest=40):
         return int(new_value)
 
 
-def by_inflation(fInfl, oUpCoupon, sColumn='coupon_value'):
+def by_inflation(fInfl, oUpCoupon, sColumn='coupon_value', iDays=364):
     """ Пересчитывает с учетом инфляции
 
     :param fInfl: Значение инфляции
@@ -75,38 +73,40 @@ def by_inflation(fInfl, oUpCoupon, sColumn='coupon_value'):
     :type oUpCoupon: pd.DataFrame
     :param sColumn: Столбец, в котором нужно пересчитывать
     :type sColumn: str
+    :param iDays: количество дней
+    :type iDays: int
     :return: список пересчитанных значений
     :rtype: list
     """
     lData = []
     for iRowNum, k in oUpCoupon.iterrows():
-        oDate = datetime.strptime(k['coupon_date'], '%Y-%m-%d')
-        fPower = -1 * ((oDate - today()).days / DAYS)
+        fPower = -1 * years(k['coupon_date'], iDays)
         lData.append(discounting(k[sColumn], fInfl, fPower))
 
     return lData
 
 
-def face_value_inflation(fInfl, oUpCoupon):
+def face_value_inflation(fInfl, oUpCoupon, iDays=364):
     """ Пересчитывает с учетом инфляции
 
     :param fInfl: Значение инфляции
     :type fInfl: float
     :param oUpCoupon: DataFrame с пересчитываемыми значениями
     :type oUpCoupon: pd.DataFrame
+    :param iDays: количество дней
+    :type iDays: int
     :return: список пересчитанных значений
     :rtype: int
     """
     sDate = oUpCoupon['coupon_date'].iloc[-1]
-    oDate = datetime.strptime(sDate, '%Y-%m-%d')
-    fPower = -1 * ((oDate - today()).days / DAYS)
+    fPower = -1 * years(sDate, iDays)
     iFaceValue = oUpCoupon['face_value'].iloc[-1]
     iInflFaceValue = discounting(iFaceValue, fInfl, fPower)
 
     return iInflFaceValue
 
 
-def discounting(fSumm, fDiscountRate, fPower=-1):
+def discounting(fSumm, fDiscountRate, fPower=-1.0):
     return fSumm * (1 + fDiscountRate) ** fPower
 
 
@@ -153,7 +153,8 @@ def nominal_coupon_yield(iSum, iFaceValue):
 """
 
 
-def ofz_bond_profit(fSumCoupon, dACC, iFaceValue, fPrice, sDate,
+def ofz_bond_profit(fSumCoupon, dACC, iFaceValue, fPrice, sDate, iDays=364,
+                    fBirgaFee=0.00003, fBrokerFee=0.0003, fTax=0.13,
                     bBirgaFee=False, bBrokerFee=False, bTax=False):
     """ Возвращает прибыль за сделку до погашения облигации без учета
     амортизации, налогов
@@ -169,6 +170,14 @@ def ofz_bond_profit(fSumCoupon, dACC, iFaceValue, fPrice, sDate,
     :type fPrice: float
     :param sDate: Год погашения облигации
     :type sDate: str
+    :param iDays: количество дней
+    :type iDays: int
+    :param fBirgaFee:  комиссия биржи
+    :type fBirgaFee: float
+    :param fBrokerFee: комиссия брокера
+    :type fBrokerFee: float
+    :param fTax: налоговые отчисления
+    :type fTax: float
     :param bBirgaFee: учитывать ли комиссию биржи
     :type bBirgaFee: bool
     :param bBrokerFee: учитывать ли комиссию брокера
@@ -179,16 +188,15 @@ def ofz_bond_profit(fSumCoupon, dACC, iFaceValue, fPrice, sDate,
     :rtype: float
     """
     if bBirgaFee:
-        fPrice = fPrice * (1 - BIRGAFEE)
+        fPrice = fPrice * (1 - fBirgaFee)
     if bBrokerFee:
-        fPrice = fPrice * (1 - BIRGAFEE)
+        fPrice = fPrice * (1 - fBrokerFee)
 
     fProfit = iFaceValue - fPrice
     if bTax:
-        fSumCoupon = fSumCoupon * (1 - TAX)
-        oDate = datetime.strptime(sDate, '%Y-%m-%d')
-        if ((oDate - today()).days / DAYS) < 3:
-            fProfit = fProfit * (1 - TAX)
+        fSumCoupon = fSumCoupon * (1 - fTax)
+        if years(sDate, iDays) < 3:
+            fProfit = fProfit * (1 - fTax)
 
     return round(fSumCoupon - dACC + fProfit, 2)
 
@@ -197,17 +205,16 @@ def ofz_bond_profit_percent(fProfit, fPrice):
     return round(fProfit / fPrice * 100, 2)
 
 
-def percent_year(fProfitPercent, sDate):
+def percent_year(fProfitPercent, sDate, iDays=364):
     """
 
     :param fProfitPercent:
     :param sDate:
+    :param iDays: количество дней
+    :type iDays: int
     :return:
     """
-    oDate = datetime.strptime(sDate, '%Y-%m-%d')
-    fYears = (oDate - today()).days / DAYS
-
-    return round((fProfitPercent / fYears), 2)
+    return round((fProfitPercent / years(sDate, iDays)), 2)
 
 
 def price_normalization(fPrice, iFaceValue):
@@ -225,9 +232,18 @@ def sum_pandas(dataframe):
         'tool_code', as_index=False).agg({'buying_count': 'sum'})
 
 
-def years(sDate):
+def years(sDate, iDays=364):
+    """ Считает количество не полных лет между датами
+
+    :param sDate: Дата окончания
+    :type sDate: str
+    :param iDays: количество дней в году
+    :type iDays: int
+    :return:
+    """
     oDate = datetime.strptime(sDate, '%Y-%m-%d')
-    fYears = (oDate - today()).days / DAYS
+    fYears = (oDate - today()).days / iDays
+
     return fYears
 
 

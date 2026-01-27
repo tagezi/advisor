@@ -28,8 +28,8 @@ from advisor.lib.service_lib import Connector
 
 
 class MOEX(Connector):
-    def __init__(self, oConnector=None):
-        super().__init__(oConnector)
+    def __init__(self, oConnector=None, sDbPath=''):
+        super().__init__(oConnector, sDbPath)
 
         self.sDomaine = 'https://iss.moex.com/'
         self.sFaild = 'iss/'
@@ -109,8 +109,8 @@ class MOEX(Connector):
 
 
 class MOEXUpdate(Connector):
-    def __init__(self, oConnector=None):
-        super().__init__(oConnector)
+    def __init__(self, oConnector=None, sDbPath=''):
+        super().__init__(oConnector, sDbPath)
         if not self.check_update():
             self.update_master_data()
 

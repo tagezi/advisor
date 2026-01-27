@@ -20,10 +20,12 @@ import sys
 from os import path
 from PyQt6.QtWidgets import QApplication
 
+from advisor.lib.config import ConfigProgram
 from advisor.ui.main_window import MainWindow
 
 
 path = path.dirname(path.realpath(__file__))
 app = QApplication(sys.argv)
-sheet = MainWindow(path)
+oConfig = ConfigProgram(path)
+sheet = MainWindow(path, oConfig)
 sys.exit(app.exec())

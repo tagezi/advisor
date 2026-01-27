@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import QApplication, QMainWindow
 from dateutil.utils import today
 
 from advisor.lib.bond_analysis import bond_analysis_without, bond_analysis_ofz
+from advisor.lib.constants import Constants
 from advisor.lib.moex import MOEXUpdate
 from advisor.lib.portfolio import Portfolio
 from advisor.ui.help_dialog import About
@@ -42,9 +43,10 @@ from advisor.lib.yeld_curve import YeldCurve
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, sPath):
+    def __init__(self, sPath, oConfig):
         """
 
+        :param sPath:
         :type sPath: str
         """
         super().__init__()
@@ -70,13 +72,13 @@ class MainWindow(QMainWindow):
         self.oFind = None
         self.oTableDataOFZ = pd.DataFrame()
         self.sPathApp = sPath
+        self.oConstants = Constants(oConfig)
         sDBFile = None
-        oConfigProgram = ConfigProgram(self.sPathApp)
-        sBasePath = oConfigProgram.sDir
-        sDBPath = oConfigProgram.get_config_value('PATH', 'db_path')
-        sDBDir = oConfigProgram.get_config_value('DB', 'db_dir')
+        sBasePath = self.oConstants.sBasePath
+        sDBPath = self.oConstants.DB_PATH
+        sDBDir = self.oConstants.DBDIR
         if not sDBPath:
-            sDBFile = oConfigProgram.get_config_value('DB', 'db_file')
+            sDBFile = self.oConstants.DBFILE
             sDBPath = str_get_file_patch(sBasePath, sDBDir)
             sDBPath = str_get_file_patch(sDBPath, sDBFile)
 
@@ -208,7 +210,7 @@ class MainWindow(QMainWindow):
         oYeldCurve = YeldCurve(self.oConnector)
         lTempVal = oYeldCurve.lTempVal
         lKBDValues = oYeldCurve.get_KBD_values()
-        lDate, lYield = oYeldCurve.get_ofz_yeld()
+        lDate, lYield = oYeldCurve.get_ofz_yeld(self.oConstants.DAYS)
         lCoefs = np.polyfit(lDate, lYield, deg=2)
         lXs = np.linspace(min(lDate), max(lDate), 100)
         oP = np.poly1d(lCoefs)
@@ -282,7 +284,9 @@ class MainWindow(QMainWindow):
                                            fPercent)
 
         # запускаем всю эту херь
-        oTableWidget = TableWidget(oTableData, True)
+        oTableWidget = TableWidget(oTableData, bColor=True,
+                                   lColorYield=self.oConstants.COLORYIELD,
+                                   lColorMatDate=self.oConstants.COLORMATDATE)
         self.oCentralWidget.add_tab(oTableWidget, 'Список облигаций')
 
     def onBondInfo(self, sSECID):
@@ -332,7 +336,9 @@ class MainWindow(QMainWindow):
         oTableData = bond_analysis_ofz(self.oConnector)
 
         # запускаем всю эту херь
-        oTableWidget = TableWidget(oTableData, True)
+        oTableWidget = TableWidget(oTableData, bColor=True,
+                                   lColorYield=self.oConstants.COLORYIELD,
+                                   lColorMatDate=self.oConstants.COLORMATDATE)
         self.oCentralWidget.add_tab(oTableWidget, 'Список ОФЗ')
 
     def onOpenDB(self):

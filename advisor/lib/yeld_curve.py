@@ -18,12 +18,8 @@
 
 import pandas as pd
 import numpy as np
-from dateutil.utils import today
-from datetime import datetime
 
-from advisor.lib.constants import DAYS
-from advisor.lib.math import get_KBD_in_year_precent
-from advisor.lib.math import F_0_T_eff
+from advisor.lib.math import F_0_T_eff, get_KBD_in_year_precent, years
 
 
 class YeldCurve:
@@ -55,10 +51,13 @@ class YeldCurve:
                                        self.lGValues
                                        )
 
-    def get_ofz_yeld(self):
-        """
+    def get_ofz_yeld(self, iDays=364):
+        """ Получить доходности ОФЗ облигаций
 
-        :return:
+        :param iDays: количество дней в году
+        :type iDays: int
+        :return: Списки дат и доходностей
+        :rtype: list[list, list]
         """
         oQuery = self.oConnector.get_bonds_by_value(pd=self.oPD,
                                                     bOFZ=True,
@@ -68,8 +67,7 @@ class YeldCurve:
 
         lDate = []
         for sDate in lMatData:
-            oDate = datetime.strptime(sDate, "%Y-%m-%d")
-            lDate.append(((oDate - today()).days / DAYS))
+            lDate.append(years(sDate, iDays))
 
         return lDate, lYield
 

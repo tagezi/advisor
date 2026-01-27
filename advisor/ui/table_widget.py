@@ -22,17 +22,19 @@ from PyQt6.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import QTableView
 
-from advisor.lib.constants import COLORYIELD, COLORMATDATE
 from advisor.lib.math import bring_number_into_range, years
 
 
 class PandasModel(QAbstractTableModel):
     """A model to interface a Qt view with pandas dataframe """
 
-    def __init__(self, DataFrame, bColor=False, parent=None):
+    def __init__(self, DataFrame, bColor=False, lColorYield=None,
+                 lColorMatDate=None, parent=None):
         QAbstractTableModel.__init__(self, parent)
         self._DataFrame = DataFrame
         self.bColor = bColor
+        self.lColorYield = lColorYield
+        self.lColorMatDate = lColorMatDate
 
     def rowCount(self, parent=QModelIndex()) -> int:
         """ Override method from QAbstractTableModel
@@ -68,7 +70,7 @@ class PandasModel(QAbstractTableModel):
             if role == Qt.ItemDataRole.BackgroundRole:
                 fValue = self._DataFrame.iloc[index.row(), index.column()]
                 if isinstance(fValue, int) or isinstance(fValue, float):
-                    lColor = COLORYIELD.copy()
+                    lColor = self.lColorYield.copy()
                     if (self._DataFrame.columns[index.column()] == 'Цена, %' or
                             self._DataFrame.columns[index.column()] == 'НКД'):
                         lColor.reverse()
@@ -86,7 +88,7 @@ class PandasModel(QAbstractTableModel):
                     return QColor(lColor[iValue])
 
                 if self._DataFrame.columns[index.column()] == 'Дата погашения':
-                    lColor = COLORMATDATE.copy()
+                    lColor = self.lColorMatDate.copy()
                     fYears = years(self._DataFrame.iloc[
                                        index.row(), index.column()
                                    ])
@@ -121,7 +123,8 @@ class PandasModel(QAbstractTableModel):
 
 
 class TableWidget(QTableView):
-    def __init__(self, data, bColor=False):
+    def __init__(self, data, bColor=False, lColorYield=None,
+                 lColorMatDate=None):
         super().__init__()
         self.dTableData = data
         self.bColor = bColor
@@ -130,6 +133,8 @@ class TableWidget(QTableView):
             "QHeaderView::section { font-size: 11pt; }")
         self.verticalHeader().setStyleSheet(
             "QHeaderView::section { font-size: 11pt; }")
+        self.lColorYield = lColorYield
+        self.lColorMatDate = lColorMatDate
         self.setData()
         self.resizeColumnsToContents()
         self.resizeRowsToContents()
@@ -149,7 +154,8 @@ class TableWidget(QTableView):
                 f'https://www.google.com/search?q={item.data()}')
 
     def setData(self):
-        oModel = PandasModel(self.dTableData, self.bColor)
+        oModel = PandasModel(self.dTableData, self.bColor, self.lColorYield,
+                 self.lColorMatDate)
         self.setModel(oModel)
 
 
