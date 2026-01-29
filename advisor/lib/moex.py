@@ -80,7 +80,7 @@ class MOEX(Connector):
         :param sSECID: Код ценной бумаги
         :type sSECID: str
         :return: DataFrame
-        :rtype: DataFrame
+        :rtype: pd.DataFrame
         """
         # формируем URL для получения амортизации или суммы купона
         sURL = f'{self.sDomaine}{self.sFaild}statistics/engines/stock/' \
