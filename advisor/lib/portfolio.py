@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 
 from advisor.lib.math import weighted_average_pandas
+from advisor.lib.str import str_by_locale
 
 
 class Portfolio:
@@ -59,10 +60,14 @@ class Portfolio:
                           (oPortfolio['tool_price'] *
                            oPortfolio['tool_count']).round(2))
 
+        oPortfolio = oPortfolio.dropna()
+        oPortfolio['tool_price'] =\
+            oPortfolio['tool_price'].apply(str_by_locale)
+        oPortfolio['sum'] = \
+            oPortfolio['sum'].apply(str_by_locale)
+
         oPortfolio.columns = ['Тип актива', 'Код актива', 'Имя актива',
                               'Средняя цена покупки', 'Количество', 'Сумма']
-
-        oPortfolio = oPortfolio.dropna()
         oPortfolio.index = np.arange(1, len(oPortfolio) + 1)
 
         return oPortfolio

@@ -173,8 +173,8 @@ class MainWindow(QMainWindow):
     def onPortfolio(self):
         oPortfolio = Portfolio(self.oConnector)
 
-        dTableData = oPortfolio.portfolio_data()
-        oTableWidget = TableWidget(dTableData)
+        oTableData = oPortfolio.portfolio_data()
+        oTableWidget = TableWidget(oTableData)
 
         self.oCentralWidget.add_tab(oTableWidget, 'Портфель')
 
