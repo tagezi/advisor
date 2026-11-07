@@ -26,16 +26,17 @@ from dateutil.utils import today
 
 from advisor.lib.bond_analysis import bond_analysis_without, bond_analysis_ofz
 from advisor.lib.constants import Constants
+from advisor.lib.file_import import import_csv_reports
 from advisor.lib.moex import MOEXUpdate
 from advisor.lib.portfolio import Portfolio
 from advisor.ui.help_dialog import About
+from advisor.ui.imoirt_dialog import IssuerImportDialog
 from advisor.ui.html_pages import InfoBonds
 from advisor.ui.plots import MplCanvas
 from advisor.ui.setting_dialog import SettingDialog
 from advisor.ui.tab_widget import TabWidget
 from advisor.ui.table_widget import TableWidget
 
-from advisor.lib.config import ConfigProgram
 from advisor.lib.sql import SQL, check_connect_db
 from advisor.lib.str import str_get_file_patch
 from advisor.ui.tool_dialogs import SelectBondsDialog
@@ -43,7 +44,7 @@ from advisor.lib.yeld_curve import YeldCurve
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, sPath, oConfig):
+    def __init__(self, sPath, oConfig, oScheme):
         """
 
         :param sPath:
@@ -73,6 +74,7 @@ class MainWindow(QMainWindow):
         self.oTableDataOFZ = pd.DataFrame()
         self.sPathApp = sPath
         self.oConstants = Constants(oConfig)
+        self.oScheme = oScheme
         sDBFile = None
         sBasePath = self.oConstants.sBasePath
         sDBPath = self.oConstants.DB_PATH
@@ -100,6 +102,7 @@ class MainWindow(QMainWindow):
         self.oOpenDB = QAction('Открыть базу данных...', self)
         self.oImportStock = QAction('Обновить базу данных онлайн', self)
         self.oExportToCSV = QAction('Экспортировать в CSV', self)
+        self.oImportIssuerReport = QAction('Импорт отчетов эмитента...', self)
         self.oSetting = QAction('Настройка...')
         self.oExitAct = QAction(QIcon.fromTheme('SP_exit'), 'Выход', self)
         self.oExitAct.setShortcut('Ctrl+Q')
@@ -138,6 +141,7 @@ class MainWindow(QMainWindow):
         oFileMenu.addAction(self.oOpenDB)
         oFileMenu.addAction(self.oImportStock)
         oFileMenu.addAction(self.oExportToCSV)
+        oFileMenu.addAction(self.oImportIssuerReport)
         oFileMenu.addAction(self.oSetting)
         oFileMenu.addSeparator()
         oFileMenu.addAction(self.oExitAct)
@@ -174,7 +178,7 @@ class MainWindow(QMainWindow):
         oPortfolio = Portfolio(self.oConnector)
 
         oTableData = oPortfolio.portfolio_data()
-        oTableWidget = TableWidget(oTableData)
+        oTableWidget = TableWidget(oTableData, self.oScheme)
 
         self.oCentralWidget.add_tab(oTableWidget, 'Портфель')
 
@@ -185,6 +189,7 @@ class MainWindow(QMainWindow):
         self.oOpenDB.triggered.connect(self.onOpenDB)
         self.oImportStock.triggered.connect(self.onImportStock)
         self.oExportToCSV.triggered.connect(self.onExportToCSV)
+        self.oImportIssuerReport.triggered.connect(self.onImportIssuerReport)
         self.oSetting.triggered.connect(self.onOpenSetting)
         self.oExitAct.triggered.connect(QApplication.quit)
 
@@ -284,7 +289,7 @@ class MainWindow(QMainWindow):
                                            fPercent)
 
         # запускаем всю эту херь
-        oTableWidget = TableWidget(oTableData, bColor=True,
+        oTableWidget = TableWidget(oTableData, self.oScheme, bColor=True,
                                    lColorYield=self.oConstants.COLORYIELD,
                                    lColorMatDate=self.oConstants.COLORMATDATE)
         self.oCentralWidget.add_tab(oTableWidget, 'Список облигаций')
@@ -304,11 +309,19 @@ class MainWindow(QMainWindow):
         oAbout = About(self)
         oAbout.exec()
 
+    def onImportIssuerReport(self):
+        oFileDialog = IssuerImportDialog(self.oConnector)
+        lFiles = oFileDialog.exec()
+        print(lFiles)
+        import_csv_reports(oFileDialog.GetValue()[0],
+                           oFileDialog.GetValue()[1],
+                           self.oConnector)
+
     def onImportStock(self):
         aMOEX = MOEXUpdate(self.oConnector)
         # обновляет данные для Кривой бескупонной доходности
         aMOEX.get_kbd()
-        # обновляет облигации
+        # # обновляет облигации
         aMOEX.get_collection(sType='ОФЗ', iLevel=0)
         aMOEX.get_collection(sType='Корпоративные', iLevel=0)
         aMOEX.get_collection(sType='Муниципальные', iLevel=0)
@@ -317,11 +330,11 @@ class MainWindow(QMainWindow):
         aMOEX.get_markets_bonds()
         aMOEX.get_bond_description()
         # обновляем акции
-        aMOEX.get_collection(sGroup='stock_shares_tplus',
-                             sCollectionName='stock_shares_one')
-        aMOEX.get_collection(sGroup='stock_shares_tplus',
-                             sCollectionName='stock_shares_two')
-        aMOEX.get_markets_shares()
+        # aMOEX.get_collection(sGroup='stock_shares_tplus',
+        #                      sCollectionName='stock_shares_one')
+        # aMOEX.get_collection(sGroup='stock_shares_tplus',
+        #                      sCollectionName='stock_shares_two')
+        # aMOEX.get_markets_shares()
 
     def onExportToCSV(self):
         iIndex = self.oCentralWidget.currentIndex()
@@ -336,7 +349,7 @@ class MainWindow(QMainWindow):
         oTableData = bond_analysis_ofz(self.oConnector)
 
         # запускаем всю эту херь
-        oTableWidget = TableWidget(oTableData, bColor=True,
+        oTableWidget = TableWidget(oTableData, self.oScheme, bColor=True,
                                    lColorYield=self.oConstants.COLORYIELD,
                                    lColorMatDate=self.oConstants.COLORMATDATE)
         self.oCentralWidget.add_tab(oTableWidget, 'Список ОФЗ')

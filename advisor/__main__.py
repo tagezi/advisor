@@ -26,6 +26,7 @@ from advisor.ui.main_window import MainWindow
 
 path = path.dirname(path.realpath(__file__))
 app = QApplication(sys.argv)
+oScheme = app.styleHints().colorScheme()
 oConfig = ConfigProgram(path)
-sheet = MainWindow(path, oConfig)
+sheet = MainWindow(path, oConfig, oScheme)
 sys.exit(app.exec())
