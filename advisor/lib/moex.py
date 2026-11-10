@@ -142,6 +142,7 @@ class MOEXUpdate(Connector):
     def get_markets_bonds(self):
         """ Получает таблицу инструментов торговой сессии по рынку облигаций
         """
+        print('Начало обновления доходности облигаций')
         sURL = ('https://iss.moex.com/'
                 'iss/engines/stock/markets/bonds/securities.json')
         jJSON = connect(sURL, api_delay=1.2, only=None, start=-1, limit=100)
@@ -155,6 +156,7 @@ class MOEXUpdate(Connector):
         self.update_data(jJSON=jJSON,
                          sField='marketdata_yields',
                          sTable='BondsMarketData')
+        print('Доходности облигаций обновлены')
 
     def get_markets_shares(self):
         """ Получает таблицу инструментов торговой сессии по рынку акций
