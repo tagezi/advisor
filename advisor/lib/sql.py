@@ -552,7 +552,10 @@ class SQL:
             "AND BondsSecurities.SECNAME not like \"%ОФЗ-АД%\" "
             "AND BondsSecurities.SECNAME not like \"%ОФЗ-ПК%\" "
             "AND BondsSecurities.SECNAME not like \"%ОФЗ-ИН%\" "
-            "AND BondsSecurities.BONDTYPE like \"Фикс с известным купоном\" "
+            # Делаем выборку облигайций с фиксированным купоном.
+            # В базе нет единообразия, иногда используют "Фикс",
+            # иногда "Фиксироваванный купон"
+            "AND BondsSecurities.BONDTYPE like \"%икс%\" "
             f"AND BondDescription.INITIALFACEVALUE<={iInitialFaceValue} "
             f"AND BondDescription.FACEUNIT=\"{sFaceUnit}\" "
             f"AND BondsSecurities.COUPONPERCENT>={fPercent} "
