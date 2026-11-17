@@ -108,6 +108,8 @@ class PandasModel(QAbstractTableModel):
                         self._DataFrame.columns[index.column()] == 'Цена, %' or
                         self._DataFrame.columns[index.column()] == 'Доходность, %' or                    
                         self._DataFrame.columns[index.column()] == 'Эффективная, %' or
+                        self._DataFrame.columns[index.column()] == '% в год при сред.инфл. за 5л' or
+                        self._DataFrame.columns[index.column()] == '% в год при сред.инфл. за 10л' or
                         self._DataFrame.columns[index.column()] == 'Процент купона' or
                         self._DataFrame.columns[index.column()] == 'Значение купона, руб' or
                         self._DataFrame.columns[index.column()] == 'НКД'):

@@ -98,8 +98,8 @@ def bond_analysis(dTableData, oTableData, bInfl, fInflMedian5, fInflMedian10):
 
         oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
                               'Доходность, %', 'Эффективная, %',
-                              '% в год при сред. инфл. за 5л)',
-                              '% в год при сред. инфл за 10л)',
+                              '% в год при сред.инфл. за 5л',
+                              '% в год при сред.инфл. за 10л',
                               'Процент купона', 'Значение купона, руб', 'НКД',
                               'Следующий купон', 'Период купона',
                               'Начальный номинал', 'Текущий номинал',
@@ -107,7 +107,7 @@ def bond_analysis(dTableData, oTableData, bInfl, fInflMedian5, fInflMedian10):
         # оставляем только те бумаги, которые с учетом инфляции на момент
         # погашения имеют положительную доходность
         oTableData = oTableData[
-            oTableData['% в год при сред. инфл. за 5л)'] > 0]
+            oTableData['% в год при сред.инфл. за 5л'] > 0]
     else:
         oTableData = oTableData.drop(columns=['ISIN', 'FACEUNIT'])
         oTableData.columns = ['ID', 'Имя', 'Дата погашения', 'Цена, %',
