@@ -248,6 +248,14 @@ def years(sDate, iDays=364):
 
 
 def weighted_average_pandas(dataframe):
+    """ Расчитывает средне среднюю цену покупки бумаги
+
+    :param dataframe: pandas.DataFarame pandas с купленными бумагами
+    :type dataframe: pandas.DataFarame
+    :return: Набор средних значений
+    :rtype: pandas.Series
+
+    """
     k = ''
     oSeries = pd.Series()
     for x in dataframe['tool_code']:
