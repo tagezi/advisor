@@ -1,7 +1,9 @@
-PyQt6~=6.11.0
-requests<=2.34.2
-pycodestyle<=2.15.0
-pandas~=3.0.6
-numpy~=2.5.4
+configparser~=7.3.0
 matplotlib~=3.11.2
+mplcursors~=0.7.1
+numpy~=2.5.5
+pandas~=3.0.6
+PyQt6~=6.12.1
+pycodestyle<=2.15.0
 python-dateutil<=2.9.0.post0
+requests<=2.34.2
