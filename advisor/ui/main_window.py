@@ -1,5 +1,5 @@
 #     This code is a part of program Advisor
-#     Copyright (C) 2022 contributors Advisor
+#     Copyright (C) 2026 contributors Advisor
 #     The full list is available at the link
 #     https://github.com/tagezi/advisor/blob/master/contributors.txt
 #
@@ -18,7 +18,6 @@
 
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from PyQt6.QtGui import QIcon, QAction
 from PyQt6.QtWidgets import QApplication, QMainWindow
@@ -40,7 +39,6 @@ from advisor.ui.table_widget import TableWidget
 from advisor.lib.sql import SQL, check_connect_db
 from advisor.lib.str import str_get_file_patch
 from advisor.ui.tool_dialogs import SelectBondsDialog
-from advisor.lib.yeld_curve import YeldCurve
 
 
 class MainWindow(QMainWindow):
@@ -118,9 +116,7 @@ class MainWindow(QMainWindow):
         self.oOFZBondAnalysis = QAction('Таблица ОФЗ')
 
         # Plots
-        self.oYieldCurve = QAction('Кривая бескупонной доходности')
-        self.oForwardRate = QAction('Форвардная кривая')
-        self.oTrandLine = QAction('Тренд')
+        self.oYieldCurve = QAction('Диаграмма доходности ОФЗ')
 
         # Info
         self.oBoundInfo = QAction('Облигация')
@@ -160,8 +156,6 @@ class MainWindow(QMainWindow):
         # Create Plots
         oPlotsMenu = oMenuBar.addMenu('&Диаграммы')
         oPlotsMenu.addAction(self.oYieldCurve)
-        oPlotsMenu.addAction(self.oForwardRate)
-        oPlotsMenu.addAction(self.oTrandLine)
 
         # Create Info menu
         oInfoMenu = oMenuBar.addMenu('&Данные')
@@ -200,87 +194,22 @@ class MainWindow(QMainWindow):
         self.oOFZBondAnalysis.triggered.connect(self.onOFZBondAnalysis)
 
         # Plots Menu
-        self.oYieldCurve.triggered.connect(self.onYieldCurvePlots)
-        self.oForwardRate.triggered.connect(self.onForwardRatePlots)
-        self.oTrandLine.triggered.connect(self.onTrandLinePlots)
+        self.oYieldCurve.triggered.connect(self.onOFZPlots)
 
         # Menu Help
         self.oAbout.triggered.connect(self.onDisplayAbout)
 
-    def onTrandLinePlots(self):
+    def onOFZPlots(self):
         """
 
         """
         oCanvas = MplCanvas(self)
-        oYeldCurve = YeldCurve(self.oConnector)
-        lTempVal = oYeldCurve.lTempVal
-        lKBDValues = oYeldCurve.get_KBD_values()
-        lDate, lYield = oYeldCurve.get_ofz_yeld(self.oConstants.DAYS)
-        lCoefs = np.polyfit(lDate, lYield, deg=2)
-        lXs = np.linspace(min(lDate), max(lDate), 100)
-        oP = np.poly1d(lCoefs)
-        lYs = oP(lXs)
-        oCanvas.ax.plot(lXs, lYs, color='green', label='Линия тренда')
-        oCanvas.ax.plot(lTempVal, lKBDValues, label='КБД Мосбиржи',
-                        linestyle='-', color='red')
-        fMin = min(min(lKBDValues), min(lYield))
-        fMax = max(max(lKBDValues), max(lYield))
-        oCanvas.ax.set_ylim(fMin - fMin * 0.04, fMax + fMax * 0.04)
-        oCanvas.ax.scatter(lDate, lYield, label='Доходность ОФЗ', color='blue')
-        oCanvas.ax.set_xlabel('Срок до погашения, лет', fontsize=14)
-        oCanvas.ax.set_ylabel('Доходность, %', fontsize=14)
-        sTitle = "Доходность ОФЗ, кривая доходности и лирия тренда"
-        oCanvas.ax.set_title(sTitle, fontsize=22)
-        oCanvas.ax.grid(linestyle='--', color='gray', linewidth=0.8, alpha=0.7)
-        oCanvas.ax.legend(fontsize=14)
-        self.oCentralWidget.add_tab(oCanvas, sTitle)
+        oPlot, sTitle = oCanvas.create_plots(oConnector=self.oConnector, 
+                                    iDays=self.oConstants.DAYS, 
+                                    sShowing='full')
+        
+        self.oCentralWidget.add_tab(oPlot, sTitle)
 
-    def onYieldCurvePlots(self):
-        """
-
-        """
-        oCanvas = MplCanvas(self)
-        oYeldCurve = YeldCurve(self.oConnector)
-        lTempVal = oYeldCurve.lTempVal
-        lKBDValues = oYeldCurve.get_KBD_values()
-        lDate, lYield = oYeldCurve.get_ofz_yeld()
-        oCanvas.ax.plot(lTempVal, lKBDValues, label='КБД Мосбиржи',
-                        linestyle='-', color='red')
-        fMin = min(min(lKBDValues), min(lYield))
-        fMax = max(max(lKBDValues), max(lYield))
-        oCanvas.ax.set_ylim(fMin - fMin * 0.04, fMax + fMax * 0.04)
-        oCanvas.ax.scatter(lDate, lYield, label='Доходность ОФЗ', color='blue')
-        oCanvas.ax.set_xlabel('Срок до погашения, лет', fontsize=14)
-        oCanvas.ax.set_ylabel('Доходность, %', fontsize=14)
-        sTitle = 'Кривая бескупонной доходности ОФЗ'
-        oCanvas.ax.set_title(sTitle, fontsize=22)
-        oCanvas.ax.grid(linestyle='--', color='gray', linewidth=0.8, alpha=0.7)
-        oCanvas.ax.legend(fontsize=14)
-        self.oCentralWidget.add_tab(oCanvas, sTitle)
-
-    def onForwardRatePlots(self):
-        """
-
-        """
-        oCanvas = MplCanvas(self)
-        oYeldCurve = YeldCurve(self.oConnector)
-        lTempVal = oYeldCurve.lTempVal
-        lKBDValues = oYeldCurve.get_KBD_values()
-        lForwardVal = oYeldCurve.get_forwards_val()
-        fMin = min(min(lKBDValues), min(lForwardVal))
-        fMax = max(max(lKBDValues), max(lForwardVal))
-        oCanvas.ax.set_ylim(fMin - fMin * 0.04, fMax + fMax * 0.04)
-        oCanvas.ax.plot(lTempVal, lKBDValues, label='Спотовая кривая',
-                        linestyle='-', color='red')
-        oCanvas.ax.plot(lTempVal, lForwardVal, label='Форвардная кривая',
-                        linestyle='-', color='green')
-        oCanvas.ax.set_xlabel('Срок до погашения, лет', fontsize=14)
-        oCanvas.ax.set_ylabel('Доходность, %', fontsize=14)
-        sTitle = 'Спотовая и форвардная кривые'
-        oCanvas.ax.set_title(sTitle, fontsize=22)
-        oCanvas.ax.grid(linestyle='--', color='gray', linewidth=0.8, alpha=0.7)
-        oCanvas.ax.legend(fontsize=14)
-        self.oCentralWidget.add_tab(oCanvas, sTitle)
 
     def onBondAnalysis(self, iMinPeriod=30, iMaxPeriod=181, fPercent=1):
         oTableData = bond_analysis_without(self.oConnector,

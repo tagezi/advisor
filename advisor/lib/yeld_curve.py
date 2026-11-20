@@ -1,5 +1,5 @@
 #     This code is a part of program Advisor
-#     Copyright (C) 2025 contributors Advisor
+#     Copyright (C) 2026 contributors Advisor
 #     The full list is available at the link
 #     https://github.com/tagezi/advisor/blob/master/contributors.txt
 #
@@ -62,6 +62,7 @@ class YeldCurve:
         oQuery = self.oConnector.get_bonds_by_value(pd=self.oPD,
                                                     bOFZ=True,
                                                     )
+        lNames = oQuery['SHORTNAME'].tolist()
         lMatData = oQuery['MATDATE'].tolist()
         lYield = oQuery['YIELDATPREVWAPRICE'].tolist()
 
@@ -69,7 +70,7 @@ class YeldCurve:
         for sDate in lMatData:
             lDate.append(years(sDate, iDays))
 
-        return lDate, lYield
+        return lNames, lDate, lYield
 
     def get_forwards_val(self):
         """
