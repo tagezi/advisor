@@ -1,5 +1,5 @@
 #     This code is a part of program Advisor
-#     Copyright (C) 2022 contributors Advisor
+#     Copyright (C) 2026 contributors Advisor
 #     The full list is available at the link
 #     https://github.com/tagezi/advisor/blob/master/contributors.txt
 #
@@ -16,8 +16,7 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-""" The module provides an interface for reading and editing the configuration
-file.
+""" The module provides an interface for reading/editing the conf file.
 
 *Classes*:
     ConfigProgram(sFilePath='config.ini')
@@ -41,6 +40,7 @@ file.
     .. code-block::
 
         Parameter = Foo.get_config_value(Section, Option)
+        
 """
 
 import sys
@@ -50,8 +50,10 @@ from advisor.lib.str import str_get_file_patch, str_get_path
 
 
 class ConfigProgram(ConfigParser):
-    """ A class for working with a configuration file. Allows you to read from
-    the configuration file and write there.
+    
+    """ 
+    A class for working with a configuration file. Allows you to read from the
+    configuration file and write there.
 
     *Using*:
         ::
@@ -68,12 +70,15 @@ class ConfigProgram(ConfigParser):
             Foo.set_config_value (Section, Option, Value)
 
         If you only need to create a Section and an Option, you omit the Value.
+        
     """
+    
     def __init__(self, sPathApp, sFilePath='config.ini'):
         """ Object initialization.
 
         :param sFilePath: Configuration file name.
         :type sFilePath: str
+        
         """
         super().__init__()
 
@@ -97,6 +102,7 @@ class ConfigProgram(ConfigParser):
         :type sOption: str
         :return: The value of the specified parameter in the section.
         :rtype: str
+        
         """
         return self.get(sSection, sOption)
 
@@ -109,6 +115,7 @@ class ConfigProgram(ConfigParser):
         :type sOption: str
         :param sValue: The value to write.
         :type sValue: str
+        
         """
         try:
             self.set(sSection, sOption, sValue)

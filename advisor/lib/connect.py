@@ -1,5 +1,5 @@
 #     This code is a part of program Advisor
-#     Copyright (C) 2022 contributors Advisor
+#     Copyright (C) 2026 contributors Advisor
 #     The full list is available at the link
 #     https://github.com/tagezi/advisor/blob/master/contributors.txt
 #
@@ -22,7 +22,8 @@ import requests
 
 def connect(url, api_delay=1.2, only=None, start=-1, limit=100,
             parameter=None, values=''):
-    """ Забирает информацию в виде запроса JSON возвращает словарь
+    """ 
+    Забирает информацию в виде запроса JSON возвращает словарь
 
     :param only: указывает, какое/какие поля вернуть
     :param url: URL API MOEX
@@ -39,6 +40,7 @@ def connect(url, api_delay=1.2, only=None, start=-1, limit=100,
     :type values: str
     :return: словарь ответа
     :rtype: dict
+    
     """
     time.sleep(api_delay)
     headers = {

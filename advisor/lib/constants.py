@@ -1,5 +1,5 @@
 #     This code is a part of program Advisor
-#     Copyright (C) 2022 contributors Advisor
+#     Copyright (C) 2026 contributors Advisor
 #     The full list is available at the link
 #     https://github.com/tagezi/advisor/blob/master/contributors.txt
 #
@@ -18,6 +18,12 @@
 
 class Constants:
     def __init__(self, oConfig):
+        """ Загружает константы из файла конфигурации.
+
+        :param oConfig: Ссылка на конфигурацию
+        :type oConfig: advisor.lib.config.ConfigProgram
+
+        """
         self.sBasePath = oConfig.sDir
 
         # путь до файла
@@ -62,7 +68,7 @@ class Constants:
         # сбор брокера
         self.BROKERFEE = float(oConfig.get_config_value('FEE', 'brokerfee'))
         # налоговый сбор
-        TAX = float(oConfig.get_config_value('FEE', 'taxfee'))
+        self.TAX = float(oConfig.get_config_value('FEE', 'taxfee'))
 
         # значение свободных средств для расчета эффективной доходности
         self.TEMPPORTFILIO = (

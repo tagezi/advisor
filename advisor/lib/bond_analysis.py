@@ -1,5 +1,5 @@
 #     This code is a part of program Advisor
-#     Copyright (C) 2022 contributors Advisor
+#     Copyright (C) 2026 contributors Advisor
 #     The full list is available at the link
 #     https://github.com/tagezi/advisor/blob/master/contributors.txt
 #
@@ -26,7 +26,7 @@ from advisor.lib.moex import MOEX
 
 
 def get_data(oTableData, sSECID):
-    """ Возвращает цену облигации в валюте номинала, ндк и дату погашения
+    """ Возвращает цену облигации в валюте номинала, ндк и дату погашения.
 
     :param oTableData: Таблица облигаций в формате DataFrame Pandas
     :type oTableData: pd.DataFrame
@@ -34,6 +34,7 @@ def get_data(oTableData, sSECID):
     :type sSECID: str
     :return: Цена облигации, НДК, дата погашения облигации
     :rtype: list[float, float, str]
+    
     """
     # Выбираем строку и подготавливаем её
     oRowData = oTableData.loc[oTableData['SECID'] == sSECID]

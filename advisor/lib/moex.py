@@ -35,7 +35,7 @@ class MOEX(Connector):
         self.sFaild = 'iss/'
 
     def get_master_data(self):
-        """ Возвращает ссылку на справочник Московской биржи
+        """ Возвращает ссылку на справочник Московской биржи.
 
         :return: Ссылку на справочник
         :rtype: str
@@ -140,7 +140,8 @@ class MOEXUpdate(Connector):
             self.insert_rows(sTable, sColumns, lData)
 
     def get_markets_bonds(self):
-        """ Получает таблицу инструментов торговой сессии по рынку облигаций
+        """ Получает таблицу инструментов торговой сессии по рынку облигаций.
+        
         """
         print('Начало обновления доходности облигаций')
         sURL = ('https://iss.moex.com/'
@@ -159,7 +160,8 @@ class MOEXUpdate(Connector):
         print('Доходности облигаций обновлены')
 
     def get_markets_shares(self):
-        """ Получает таблицу инструментов торговой сессии по рынку акций
+        """ Получает таблицу инструментов торговой сессии по рынку акций.
+        
         """
         sURL = ('https://iss.moex.com/iss/engines/stock/markets/shares/'
                 'boards/TQBR/securities.json')
@@ -348,7 +350,7 @@ class MOEXUpdate(Connector):
         print(f'{sType} обновились.')
 
     def return_collection_name(self, sType, iLevel):
-        """ Возвращает имя уровня облигации
+        """ Возвращает имя уровня облигации.
 
         :param sType: Тип облигаций
         :type sType: str
