@@ -27,10 +27,9 @@ from advisor.lib.bond_analysis import bond_analysis_without, bond_analysis_ofz
 from advisor.lib.constants import Constants
 from advisor.lib.file_import import import_csv_reports
 from advisor.lib.moex import MOEXUpdate
-from advisor.lib.portfolio import Portfolio
 from advisor.ui.help_dialog import About
 from advisor.ui.imoirt_dialog import IssuerImportDialog
-from advisor.ui.html_pages import InfoBonds
+from advisor.ui.html_pages import InfoBonds, InfoPortfolio
 from advisor.ui.plots import MplCanvas
 from advisor.ui.setting_dialog import SettingDialog
 from advisor.ui.tab_widget import TabWidget
@@ -168,14 +167,6 @@ class MainWindow(QMainWindow):
         oHelpMenu.addAction(self.oOpenHelp)
         oHelpMenu.addAction(self.oAbout)
 
-    def onPortfolio(self):
-        oPortfolio = Portfolio(self.oConnector)
-
-        oTableData = oPortfolio.portfolio_data()
-        oTableWidget = TableWidget(oTableData, self.oScheme)
-
-        self.oCentralWidget.add_tab(oTableWidget, 'Портфель')
-
     def connect_actions(self):
         """ It is PyQt6 slots or other words is connecting from GUI element to
         method or function in program. """
@@ -289,6 +280,14 @@ class MainWindow(QMainWindow):
     def onOpenSetting(self):
         oSettingDialog = SettingDialog(self.oConnector, self.sPathApp, self)
         oSettingDialog.exec()
+        
+    def onPortfolio(self):
+        """ Выводит портфолио во вкладку при старте программы.
+
+        """
+        oPortfolio = InfoPortfolio(self.oConnector)
+
+        self.oCentralWidget.add_tab(oPortfolio, 'Портфель')
 
     def onSetStatusBarMessage(self, sMassage='Ready'):
         """ Method create Status Bar on main window of program GUI. """

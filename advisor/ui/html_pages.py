@@ -15,11 +15,13 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import pandas as pd
 from PyQt6.QtWidgets import QTextBrowser
 
 from advisor.lib.bond_analysis import BondAnalysis
 from advisor.lib.math import price_normalization
+from advisor.lib.portfolio import Portfolio
 from advisor.lib.str import str_by_locale
 
 
@@ -43,25 +45,29 @@ class HTMLDoc:
                          'border-collapse: collapse;'
                          'font-size: 15px;'
                          'margin-top: 10px;'
+                         'margin-left: 10px;'
                          '}'
+                         'td, th {'
+                         'padding-left: 5px;'
+                         'padding-right: 5px'
+                        '}'
                          '.center { text-align: center; }'
                          )
         self.lDoc.append('</style>')
 
     def set_title_doc(self, sTitle, iLevel=2):
-        """ Форматирует заголовок документа из составляющих имени и ранга
-         таксона.
+        """ Форматирует заголовок документа.
 
         :param iLevel: уровень заголовка
         :type iLevel: int
-        :param sTitle: ранг таксона
+        :param sTitle: заголовок
         :type sTitle: str
         :return: none
         """
         self.lDoc.append(f'<h{iLevel}>{sTitle}</h{iLevel}>')
 
     def set_string(self, String):
-        """ Устанавливает строку и переводит каретку в формате HTML
+        """ Устанавливает строку и переводит каретку в формате HTML.
 
         :param String: Строка для добавления в список
         :type String: str
@@ -102,7 +108,7 @@ class HTMLDoc:
         return sHTML
 
     def set_link(self, sName, sQuery):
-        """ Добавляет ссылку на источник
+        """ Добавляет ссылку на источник.
 
         :param sName: название источника
         :type sName: str
@@ -143,10 +149,9 @@ class HTMLDoc:
 
 
 class HTMLPage(QTextBrowser):
-    def __init__(self, oConnector, sSECID):
+    def __init__(self, oConnector, sSECID=''):
         super().__init__()
         self.oConnector = oConnector
-        self.sSciName = sSECID
         self.oHTML = HTMLDoc()
         self.dField = {}
         self.setOpenExternalLinks(True)
@@ -223,6 +228,38 @@ class InfoIssuer(HTMLPage):
     def __init__(self, oConnector, sSECID):
         super().__init__(oConnector, sSECID)
 
+
+class InfoPortfolio(HTMLPage):
+    def __init__(self, oConnector):
+        super().__init__(oConnector)
+        self._doc()
+
+    def _doc(self):
+        lColumns = ['Тип бумаги', 'Код бумаги',
+                    'Имя эмитента', 'Средняя цена', 'Количество', 'Сумма']
+        oPortfolio = Portfolio(self.oConnector)
+        self.oHTML.set_title_doc('Портфолио')
+        
+        self.oHTML.set_title_doc('Акции', 3)
+        oShare = oPortfolio.portfolio_share()
+        sShare = self.df_to_table(oShare, lColumns)
+        self.oHTML.set_string(sShare)
+        
+        self.oHTML.set_title_doc('Облигации', 3)
+        oBound = oPortfolio.portfolio_bound()
+        sBound = self.df_to_table(oBound, lColumns)
+        self.oHTML.set_string(sBound)
+        
+        self.setText(self.oHTML.get_doc())
+
+    @staticmethod
+    def df_to_table(oDF, lColumns):
+        oDF.columns = lColumns
+        sHTML = oDF.to_html(index=False)
+        sHTML = sHTML.replace(' style="text-align: right;"', '')
+        sHTML = sHTML.replace('<td>', '<td class="center">')
+
+        return sHTML
 
 if __name__ == '__main__':
     pass

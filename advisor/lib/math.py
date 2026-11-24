@@ -278,7 +278,7 @@ def weighted_average_pandas(dataframe):
             if wt.sum() != 0:
                 oSeries = pd.Series(((val * wt).sum() / wt.sum()))
             else:
-                oSeries = np.nan
+                oSeries.loc[0] = np.nan
 
     return oSeries
 

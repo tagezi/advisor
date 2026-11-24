@@ -17,7 +17,6 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-import pandas as pd
 
 from advisor.lib.math import weighted_average_pandas
 from advisor.lib.str import str_by_locale
@@ -27,10 +26,7 @@ class Portfolio:
     def __init__(self, oConnector):
         self.oConnector = oConnector
 
-    def portfolio_data(self):
-        # все преобразования проходят в DataFrame Pandas, если не указано иное
-        oPortfolio = self.oConnector.portfolio(pd)
-
+    def portfolio_data(self, oPortfolio):
         # удаляем проданные бумаги
         oPortfolio.loc[oPortfolio['event_id'] == 5, 'tool_count'] =\
             oPortfolio.loc[oPortfolio['event_id'] == 5, 'tool_count'] * -1
@@ -53,7 +49,7 @@ class Portfolio:
         oPortfolio.insert(0, 'tool_type', type_tool)
 
         # объединяем таблицы
-        oPortfolio['tool_price'] = oSeriesPWA.values.round(2)
+        oPortfolio['tool_price'] = oSeriesPWA.values
         oPortfolio.insert(4, 'tool_count', oSumByTool['tool_count'])
 
         oPortfolio.insert(5, 'sum',
@@ -61,6 +57,7 @@ class Portfolio:
                            oPortfolio['tool_count']).round(2))
 
         oPortfolio = oPortfolio.dropna()
+        oPortfolio['tool_price'] = oPortfolio['tool_price'].round(2)
         oPortfolio['tool_price'] =\
             oPortfolio['tool_price'].apply(str_by_locale)
         oPortfolio['sum'] = \
@@ -71,6 +68,14 @@ class Portfolio:
         oPortfolio.index = np.arange(1, len(oPortfolio) + 1)
 
         return oPortfolio
+        
+    def portfolio_share(self):
+        oPortfolio = self.oConnector.portfolio('share')
+        return self.portfolio_data(oPortfolio)
+        
+    def portfolio_bound(self):
+        oPortfolio = self.oConnector.portfolio('bound')
+        return self.portfolio_data(oPortfolio)
 
 
 if __name__ == '__main__':

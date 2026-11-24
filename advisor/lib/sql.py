@@ -471,38 +471,39 @@ class SQL:
         return False
 
     # TODO: UnitTest for one
-    def portfolio(self, pd):
+    def portfolio(self, sSecurities):
         """
 
-        :type pd: pandas
+        :type sSecurities: str
         :return:
         :rtype: pd.DataFrame
         """
-        dfb = pd.read_sql_query(
-            "SELECT Tools.tool_type, AccountEvents.event_id, "
-            "AccountEvents.tool_code, BondsSecurities.SHORTNAME, "
-            "AccountEvents.tool_price, AccountEvents.tool_count "
-            "FROM AccountEvents "
-            "JOIN Tools "
-            "ON Tools.tool_id=AccountEvents.tool_id "
-            "JOIN BondsSecurities "
-            "ON BondsSecurities.SECID=AccountEvents.tool_code "
-            "WHERE AccountEvents.tool_price is not NULL; ",
-            self.oConnector)
+        if sSecurities == 'bound':
+            oSecurities = pd.read_sql_query(
+                "SELECT Tools.tool_type, AccountEvents.event_id, "
+                "AccountEvents.tool_code, BondsSecurities.SHORTNAME, "
+                "AccountEvents.tool_price, AccountEvents.tool_count "
+                "FROM AccountEvents "
+                "JOIN Tools "
+                "ON Tools.tool_id=AccountEvents.tool_id "
+                "JOIN BondsSecurities "
+                "ON BondsSecurities.SECID=AccountEvents.tool_code "
+                "WHERE AccountEvents.tool_price is not NULL; ",
+                self.oConnector)
+        else:
+            oSecurities = pd.read_sql_query(
+                "SELECT Tools.tool_type, AccountEvents.event_id, "
+                "AccountEvents.tool_code, SharesCollections.SHORTNAME, "
+                "AccountEvents.tool_price, AccountEvents.tool_count "
+                "FROM AccountEvents "
+                "JOIN Tools "
+                "ON Tools.tool_id=AccountEvents.tool_id "
+                "JOIN SharesCollections "
+                "ON SharesCollections.SECID=AccountEvents.tool_code "
+                "WHERE AccountEvents.tool_price is not NULL; ",
+                self.oConnector)
 
-        dfs = pd.read_sql_query(
-            "SELECT Tools.tool_type, AccountEvents.event_id, "
-            "AccountEvents.tool_code, SharesCollections.SHORTNAME, "
-            "AccountEvents.tool_price, AccountEvents.tool_count "
-            "FROM AccountEvents "
-            "JOIN Tools "
-            "ON Tools.tool_id=AccountEvents.tool_id "
-            "JOIN SharesCollections "
-            "ON SharesCollections.SECID=AccountEvents.tool_code "
-            "WHERE AccountEvents.tool_price is not NULL; ",
-            self.oConnector)
-
-        return pd.concat([dfb, dfs], axis=0, join='outer', ignore_index=True)
+        return oSecurities
 
     def get_bonds_by_value(self, pd, iInitialFaceValue=1000, sFaceUnit='SUR',
                            fMinYield=10, fMaxYield=30, bOFZ=False,
@@ -641,7 +642,7 @@ class SQL:
             "ON BondDescription.SECID=BondsSecurities.SECID "
             "JOIN BondsMarketData "
             "ON BondDescription.SECID=BondsMarketData.SECID "
-            f"WHERE BondDescription.SECID=?;", (sSECID,))
+            "WHERE BondDescription.SECID=?;", (sSECID,))
 
         return lAnswer
 
