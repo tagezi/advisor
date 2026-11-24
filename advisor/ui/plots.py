@@ -40,8 +40,8 @@ def choice_title(sShowing):
     elif sShowing == 'kbd':
         sTitle = 'Кривая бескупонной доходности ОФЗ'
     else:
-        sTitle = 'Доходность ОФЗ, кривая доходности и линия тренда'
-    
+        sTitle = 'Доходность ОФЗ, спотовая, форвордная и линия тренда'
+
     return sTitle
 
 
