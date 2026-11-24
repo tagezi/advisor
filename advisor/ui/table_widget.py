@@ -1,5 +1,5 @@
 #     This code is a part of program Advisor
-#     Copyright (C) 2022 contributors Advisor
+#     Copyright (C) 2026 contributors Advisor
 #     The full list is available at the link
 #     https://github.com/tagezi/advisor/blob/master/contributors.txt
 #
@@ -26,7 +26,10 @@ from advisor.lib.math import bring_number_into_range, years
 
 
 class PandasModel(QAbstractTableModel):
-    """A model to interface a Qt view with pandas dataframe """
+    """
+    A model to interface a Qt view with pandas dataframe.
+    
+    """
 
     def __init__(self, DataFrame, oScheme, bColor=False, lColorYield=None,
                  lColorMatDate=None,  parent=None):
@@ -38,9 +41,10 @@ class PandasModel(QAbstractTableModel):
         self.oScheme = oScheme
 
     def rowCount(self, parent=QModelIndex()) -> int:
-        """ Override method from QAbstractTableModel
+        """ Override method from QAbstractTableModel.
 
         Return row count of the pandas DataFrame
+        
         """
         if parent == QModelIndex():
             return len(self._DataFrame)
@@ -48,18 +52,20 @@ class PandasModel(QAbstractTableModel):
         return 0
 
     def columnCount(self, parent=QModelIndex()) -> int:
-        """Override method from QAbstractTableModel
+        """Override method from QAbstractTableModel.
 
         Return column count of the pandas DataFrame
+        
         """
         if parent == QModelIndex():
             return len(self._DataFrame.columns)
         return 0
 
     def data(self, index: QModelIndex, role=Qt.ItemDataRole):
-        """Override method from QAbstractTableModel
+        """Override method from QAbstractTableModel.
 
         Return data cell from the pandas DataFrame
+        
         """
         if not index.isValid():
             return None
@@ -124,10 +130,11 @@ class PandasModel(QAbstractTableModel):
                    section: int,
                    orientation: Qt.Orientation,
                    role: Qt.ItemDataRole):
-        """Override method from QAbstractTableModel
+        """Override method from QAbstractTableModel.
 
         Return dataframe index as vertical header data and columns as
         horizontal header data.
+        
         """
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
